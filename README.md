@@ -33,6 +33,7 @@ Matrix multiplication core for the Fast Orbit Feedback Controller
 |    |        Top design modules.
 |
 *
+```
 
 ## Cloning Instructions
 
