@@ -1,18 +1,41 @@
-# Build and Release Folders
-bin-debug/
-bin-release/
-[Oo]bj/
-[Bb]in/
+*~
+*.swp
+*.orig
+hdl/syn/*.runs*
 
-# Other files and folders
-.settings/
+######################
+# Compilation files
+######################
 
-# Executables
-*.swf
-*.air
-*.ipa
-*.apk
+*Makefile
+*transcript
+*make_*
+*_history
 
-# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
-# should NOT be excluded as they contain compiler settings and other important
-# information for Eclipse / Flash Builder.
+######################
+# Modelsim
+######################
+
+*.wlf
+work/
+
+######################
+# Temporary files
+######################
+
+*#*
+
+######################
+# Vivado files
+######################
+
+*.jou
+*.log
+*.str
+*.xpr
+*.edif
+*.mif
+.Xil/
+
+/platform/xilinx/artix7/chipscope/ila_t8_d256_s8192_cap
+/platform/xilinx/artix7/chipscope/vio_din2_w64_dout2_w64
