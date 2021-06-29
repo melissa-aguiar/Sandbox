@@ -12,7 +12,7 @@
 
 -------------------------------------------------------------------------------
 
--- Description:  Matrix multiplication core for the Fast Orbit Feedback
+-- Description:  Matrix multiplication module for the Fast Orbit Feedback
 
 -------------------------------------------------------------------------------
 
@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-18-06  1.0      melissa.aguiar        Created
+-- 2021-29-06  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -35,7 +35,7 @@ use ieee.std_logic_1164.ALL;
 use ieee.numeric_std.all;
 
 library work;
-use work.array_pkg.all;
+use work.mult_pkg.all;
 
 entity matmul is
   generic(
@@ -50,6 +50,8 @@ entity matmul is
     v_i                             : in std_logic;
     -- Input a[k] and index k
     a_i                             : in t_record;
+    -- Input b[k]
+    b_i                             : in signed(g_BITS-1 downto 0);
     -- Result output
     c_o                             : out signed(g_BITS-1 downto 0);
     -- Data valid output
@@ -58,14 +60,10 @@ entity matmul is
 end matmul;
 
 architecture behave of matmul is
-  signal result_s        : signed(g_BITS-1 downto 0) := (others =>'0');
+  signal result_s        : signed(2*g_BITS-1 downto 0) := (others =>'0');
   signal a_s             : t_record;
   constant cnt_max       : integer := 3;
   signal cnt             : integer range 0 to cnt_max+1 := 0;
-
-  -- creating and initializing a memory for testing
-  --type mem_type is array(0 to M-1) of integer;
-  --signal mem : mem_type := (3, 2, 1);
 
 begin
   matmul_process : process (clk_i) is
@@ -79,13 +77,13 @@ begin
     else
 
       if v_i='1' then
-        result_s <= result_s + a_s.r_a; -- the multiplication module comes here
+        result_s <= result_s + a_s.r_a*b_i; -- Add pipeline stages here
         cnt <= cnt + 1;
         v_o <= '0';
       end if;
 
       if cnt=cnt_max then
-        c_o <= result_s;
+      c_o <= resize(result_s, c_o'length); -- Studies to round the output
         cnt <= 0;
         result_s <= (others =>'0');
         v_o <= '1';
@@ -95,4 +93,3 @@ begin
 end process;
     a_s <= a_i;
 end behave;
-

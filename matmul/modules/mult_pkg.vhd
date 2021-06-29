@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-18-06  1.0      melissa.aguiar        Created
+-- 2021-29-06  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -34,8 +34,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package array_pkg is
-
+package mult_pkg is
   type t_record is
   record
     r_a : signed(32-1 downto 0);   -- value of input a[k]
@@ -48,8 +47,9 @@ package array_pkg is
       rst_n_i : in std_logic;
       v_i     : in std_logic;
       a_i     : in t_record;
+      b_i     : in signed(32-1 downto 0);
       c_o     : out signed(32-1 downto 0);
       v_o     : out std_logic
       );
   end component;
-end package array_pkg;
+end package mult_pkg;

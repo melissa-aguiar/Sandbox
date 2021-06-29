@@ -1,4 +1,4 @@
 files = [
-    "matmul.vhd", "array_pkg.vhd",
+    "matmul.vhd", "mult_pkg.vhd",
 ]
 
