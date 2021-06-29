@@ -49,8 +49,8 @@ architecture behave of mult_tb is
   signal rst_s    : std_logic := '0';
   signal v_i_s    : std_logic := '0';
   signal a_s      : t_record;
-  signal b_s      : signed(g_BITS-1 downto 0) := (others => '0');
-  signal c_s      : signed(g_BITS-1 downto 0);
+  signal b_s      : unsigned(g_BITS-1 downto 0) := (others => '0');
+  signal c_s      : unsigned(g_BITS-1 downto 0);
   signal v_o_s    : std_logic := '0';
 
 begin
@@ -79,13 +79,13 @@ begin
 
   v_i_s <= '1';
 
-  a_s.r_a <= to_signed(1, a_s.r_a'length);
+  a_s.r_a <= to_unsigned(1, a_s.r_a'length);
   a_s.r_k <= to_unsigned(2, a_s.r_k'length);
-  b_s <= to_signed(1, b_s'length);
+  b_s <= to_unsigned(1, b_s'length);
 
   wait for clk_period;
 
-  a_s.r_a <= to_signed(2, a_s.r_a'length);
+  a_s.r_a <= to_unsigned(2, a_s.r_a'length);
   a_s.r_k <= to_unsigned(1, a_s.r_k'length);
 
   wait for clk_period;
@@ -96,29 +96,29 @@ begin
 
   v_i_s <= '1';
 
-  a_s.r_a <= to_signed(3, a_s.r_a'length);
+  a_s.r_a <= to_unsigned(3, a_s.r_a'length);
   a_s.r_k <= to_unsigned(0, a_s.r_k'length);
 
   wait for clk_period;
 
-  a_s.r_a <= to_signed(3, a_s.r_a'length);
+  a_s.r_a <= to_unsigned(3, a_s.r_a'length);
   a_s.r_k <= to_unsigned(2, a_s.r_k'length);
-  b_s <= to_signed(2, b_s'length);
+  b_s <= to_unsigned(2, b_s'length);
 
   wait for clk_period;
 
-  a_s.r_a <= to_signed(2, a_s.r_a'length);
+  a_s.r_a <= to_unsigned(2, a_s.r_a'length);
   a_s.r_k <= to_unsigned(1, a_s.r_k'length);
 
   wait for clk_period;
 
-  a_s.r_a <= to_signed(1, a_s.r_a'length);
+  a_s.r_a <= to_unsigned(1, a_s.r_a'length);
   a_s.r_k <= to_unsigned(0, a_s.r_k'length);
 
   wait for clk_period;
   wait for clk_period;
 
-  if c_s = to_signed(6, c_s'length) then
+  if c_s = to_unsigned(6, c_s'length) then
       report "SUCESS";
   else
       report "FAILURE";

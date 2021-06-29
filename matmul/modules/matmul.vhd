@@ -51,16 +51,16 @@ entity matmul is
     -- Input a[k] and index k
     a_i                             : in t_record;
     -- Input b[k]
-    b_i                             : in signed(g_BITS-1 downto 0);
+    b_i                             : in unsigned(g_BITS-1 downto 0);
     -- Result output
-    c_o                             : out signed(g_BITS-1 downto 0);
+    c_o                             : out unsigned(g_BITS-1 downto 0);
     -- Data valid output
     v_o                             : out std_logic
     );
 end matmul;
 
 architecture behave of matmul is
-  signal result_s        : signed(2*g_BITS-1 downto 0) := (others =>'0');
+  signal result_s        : unsigned(2*g_BITS-1 downto 0) := (others =>'0');
   signal a_s             : t_record;
   constant cnt_max       : integer := 3;
   signal cnt             : integer range 0 to cnt_max+1 := 0;

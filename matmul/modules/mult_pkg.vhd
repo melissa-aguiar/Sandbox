@@ -38,7 +38,7 @@ package mult_pkg is
 
   type t_record is
   record
-    r_a : signed(32-1 downto 0);   -- value of input a[k]
+    r_a : unsigned(32-1 downto 0);   -- value of input a[k]
     r_k : unsigned(32-1 downto 0); -- value of index k
   end record;
 
@@ -51,8 +51,8 @@ package mult_pkg is
       rst_n_i : in std_logic;
       v_i     : in std_logic;
       a_i     : in t_record;
-      b_i     : in signed(g_BITS-1 downto 0);
-      c_o     : out signed(g_BITS-1 downto 0);
+      b_i     : in unsigned(g_BITS-1 downto 0);
+      c_o     : out unsigned(g_BITS-1 downto 0);
       v_o     : out std_logic
       );
   end component;
