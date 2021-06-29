@@ -2,6 +2,8 @@
 *.swp
 *.orig
 hdl/syn/*.runs*
+*.vcd
+*.cf
 
 ######################
 # Compilation files
