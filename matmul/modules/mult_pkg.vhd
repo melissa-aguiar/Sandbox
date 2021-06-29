@@ -35,6 +35,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 package mult_pkg is
+
   type t_record is
   record
     r_a : signed(32-1 downto 0);   -- value of input a[k]
@@ -42,13 +43,16 @@ package mult_pkg is
   end record;
 
   component matmul is
+    generic(
+      g_BITS : natural := 32
+      );
     port(
       clk_i   : in std_logic;
       rst_n_i : in std_logic;
       v_i     : in std_logic;
       a_i     : in t_record;
-      b_i     : in signed(32-1 downto 0);
-      c_o     : out signed(32-1 downto 0);
+      b_i     : in signed(g_BITS-1 downto 0);
+      c_o     : out signed(g_BITS-1 downto 0);
       v_o     : out std_logic
       );
   end component;

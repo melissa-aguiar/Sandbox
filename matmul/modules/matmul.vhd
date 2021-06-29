@@ -83,7 +83,7 @@ begin
       end if;
 
       if cnt=cnt_max then
-      c_o <= resize(result_s, c_o'length); -- Studies to round the output
+        c_o <= resize(result_s, c_o'length); -- Studies to round the output
         cnt <= 0;
         result_s <= (others =>'0');
         v_o <= '1';
@@ -91,5 +91,5 @@ begin
     end if;
   end if;
 end process;
-    a_s <= a_i;
+  a_s <= a_i;
 end behave;

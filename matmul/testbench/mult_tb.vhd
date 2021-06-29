@@ -43,13 +43,14 @@ end mult_tb;
 architecture behave of mult_tb is
 
   constant clk_period : time := 10 ns;
+  constant g_BITS     : natural := 32;
 
   signal clk_s    : std_logic := '0';
   signal rst_s    : std_logic := '0';
   signal v_i_s    : std_logic := '0';
   signal a_s      : t_record;
-  signal b_s      : signed(32-1 downto 0) := (others => '0');
-  signal c_s      : signed(32-1 downto 0);
+  signal b_s      : signed(g_BITS-1 downto 0) := (others => '0');
+  signal c_s      : signed(g_BITS-1 downto 0);
   signal v_o_s    : std_logic := '0';
 
 begin
@@ -119,8 +120,7 @@ begin
 
   if c_s = to_signed(6, c_s'length) then
       report "SUCESS";
-
-    else
+  else
       report "FAILURE";
   end if;
 
