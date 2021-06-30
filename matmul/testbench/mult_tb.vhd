@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-29-06  1.0      melissa.aguiar        Created
+-- 2021-30-06  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -43,15 +43,17 @@ end mult_tb;
 architecture behave of mult_tb is
 
   constant clk_period : time := 10 ns;
-  constant g_BITS     : natural := 32;
 
-  signal clk_s    : std_logic := '0';
-  signal rst_s    : std_logic := '0';
-  signal v_i_s    : std_logic := '0';
-  signal a_s      : t_record;
-  signal b_s      : unsigned(g_BITS-1 downto 0) := (others => '0');
-  signal c_s      : unsigned(g_BITS-1 downto 0);
-  signal v_o_s    : std_logic := '0';
+  constant g_b_width  : natural := 32;
+  constant g_c_width  : natural := 32;
+
+  signal clk_s        : std_logic := '0';
+  signal rst_s        : std_logic := '0';
+  signal v_i_s        : std_logic := '0';
+  signal a_s          : t_record;
+  signal b_s          : unsigned(g_b_width-1 downto 0) := (others => '0');
+  signal c_s          : unsigned(g_c_width-1 downto 0);
+  signal v_o_s        : std_logic := '0';
 
 begin
 
@@ -75,54 +77,54 @@ begin
   process
   begin
 
-  rst_s <= '1';
+    rst_s <= '1';
 
-  v_i_s <= '1';
+    v_i_s <= '1';
 
-  a_s.r_a <= to_unsigned(1, a_s.r_a'length);
-  a_s.r_k <= to_unsigned(2, a_s.r_k'length);
-  b_s <= to_unsigned(1, b_s'length);
+    a_s.r_a <= to_unsigned(1, a_s.r_a'length);
+    a_s.r_k <= to_unsigned(2, a_s.r_k'length);
+    b_s <= to_unsigned(1, b_s'length);
 
-  wait for clk_period;
+    wait for clk_period;
 
-  a_s.r_a <= to_unsigned(2, a_s.r_a'length);
-  a_s.r_k <= to_unsigned(1, a_s.r_k'length);
+    a_s.r_a <= to_unsigned(2, a_s.r_a'length);
+    a_s.r_k <= to_unsigned(1, a_s.r_k'length);
 
-  wait for clk_period;
+    wait for clk_period;
 
-  v_i_s <= '0';
+    v_i_s <= '0';
 
-  wait for clk_period;
+    wait for clk_period;
 
-  v_i_s <= '1';
+    v_i_s <= '1';
 
-  a_s.r_a <= to_unsigned(3, a_s.r_a'length);
-  a_s.r_k <= to_unsigned(0, a_s.r_k'length);
+    a_s.r_a <= to_unsigned(3, a_s.r_a'length);
+    a_s.r_k <= to_unsigned(0, a_s.r_k'length);
 
-  wait for clk_period;
+    wait for clk_period;
 
-  a_s.r_a <= to_unsigned(3, a_s.r_a'length);
-  a_s.r_k <= to_unsigned(2, a_s.r_k'length);
-  b_s <= to_unsigned(2, b_s'length);
+    a_s.r_a <= to_unsigned(3, a_s.r_a'length);
+    a_s.r_k <= to_unsigned(2, a_s.r_k'length);
+    b_s <= to_unsigned(2, b_s'length);
 
-  wait for clk_period;
+    wait for clk_period;
 
-  a_s.r_a <= to_unsigned(2, a_s.r_a'length);
-  a_s.r_k <= to_unsigned(1, a_s.r_k'length);
+    a_s.r_a <= to_unsigned(2, a_s.r_a'length);
+    a_s.r_k <= to_unsigned(1, a_s.r_k'length);
 
-  wait for clk_period;
+    wait for clk_period;
 
-  a_s.r_a <= to_unsigned(1, a_s.r_a'length);
-  a_s.r_k <= to_unsigned(0, a_s.r_k'length);
+    a_s.r_a <= to_unsigned(1, a_s.r_a'length);
+    a_s.r_k <= to_unsigned(0, a_s.r_k'length);
 
-  wait for clk_period;
-  wait for clk_period;
+    wait for clk_period;
+    wait for clk_period;
 
-  if c_s = to_unsigned(6, c_s'length) then
-      report "SUCESS";
-  else
-      report "FAILURE";
-  end if;
+    if c_s = to_unsigned(6, c_s'length) then
+        report "SUCESS";
+    else
+        report "FAILURE";
+    end if;
 
   end process;
 

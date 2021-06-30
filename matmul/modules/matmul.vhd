@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-29-06  1.0      melissa.aguiar        Created
+-- 2021-30-06  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -39,31 +39,36 @@ use work.mult_pkg.all;
 
 entity matmul is
   generic(
-  g_BITS : natural := 32
+    -- Width for input b[k]
+    g_b_width                   : natural := 32;
+    -- Width for output c
+    g_c_width                   : natural := 32
   );
   port (
     -- Core clock
-    clk_i                           : in std_logic;
+    clk_i                       : in std_logic;
     -- Reset
-    rst_n_i                         : in std_logic;
+    rst_n_i                     : in std_logic;
     -- Data valid input
-    v_i                             : in std_logic;
+    v_i                         : in std_logic;
     -- Input a[k] and index k
-    a_i                             : in t_record;
+    a_i                         : in t_record;
     -- Input b[k]
-    b_i                             : in unsigned(g_BITS-1 downto 0);
+    b_i                         : in unsigned(g_b_width-1 downto 0);
     -- Result output
-    c_o                             : out unsigned(g_BITS-1 downto 0);
+    c_o                         : out unsigned(g_c_width-1 downto 0);
     -- Data valid output
-    v_o                             : out std_logic
+    v_o                         : out std_logic
     );
 end matmul;
 
 architecture behave of matmul is
-  signal result_s        : unsigned(2*g_BITS-1 downto 0) := (others =>'0');
-  signal a_s             : t_record;
-  constant cnt_max       : integer := 3;
-  signal cnt             : integer range 0 to cnt_max+1 := 0;
+  signal result_s               : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
+  signal a_s                    : t_record;
+  signal a, b                   : unsigned(g_b_width-1 downto 0) := (others =>'0');
+  signal r1, r2, r3, r4, r5, r6 : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
+  constant cnt_max              : integer := 3;
+  signal cnt                    : integer range 0 to cnt_max+1 := 0;
 
 begin
   matmul_process : process (clk_i) is
@@ -75,9 +80,16 @@ begin
       result_s <= (others =>'0');
       c_o <= (others =>'0');
     else
-
-      if v_i='1' then
-        result_s <= result_s + a_s.r_a*b_i; -- Add pipeline stages here
+      a <= a_s.r_a;
+      b <= b_i;
+      if v_i='1' then --
+        result_s <= result_s + a*b; -- The optimal number of pipeline stagies is 6
+        r1 <= result_s;
+        r2 <= r1;
+        r3 <= r2;
+        r4 <= r3;
+        r5 <= r4;
+        r6 <= r5;
         cnt <= cnt + 1;
         v_o <= '0';
       end if;
