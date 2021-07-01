@@ -92,12 +92,6 @@ begin
 
     wait for clk_period;
 
-    v_i_s <= '0';
-
-    wait for clk_period;
-
-    v_i_s <= '1';
-
     a_s.r_a <= to_unsigned(3, a_s.r_a'length);
     a_s.r_k <= to_unsigned(0, a_s.r_k'length);
 
@@ -120,8 +114,8 @@ begin
     wait for clk_period;
     wait for clk_period;
 
-    if c_s = to_unsigned(6, c_s'length) then
-        report "SUCESS";
+    if c_s = to_unsigned(6, c_s'length) then -- 1*1 + 2*1 + 3*1
+      report "SUCESS";
     else
         report "FAILURE";
     end if;
