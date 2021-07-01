@@ -42,7 +42,9 @@ entity matmul is
     -- Width for input b[k]
     g_b_width                   : natural := 32;
     -- Width for output c
-    g_c_width                   : natural := 32
+    g_c_width                   : natural := 32;
+    -- Multiplier pipeline
+    g_levels                    : natural := 6
   );
   port (
     -- Core clock
@@ -50,7 +52,7 @@ entity matmul is
     -- Reset
     rst_n_i                     : in std_logic;
     -- Data valid input
-    v_i                         : in std_logic;
+    valid_i                     : in std_logic;
     -- Input a[k] and index k
     a_i                         : in t_record;
     -- Input b[k]
@@ -58,50 +60,71 @@ entity matmul is
     -- Result output
     c_o                         : out unsigned(g_c_width-1 downto 0);
     -- Data valid output
-    v_o                         : out std_logic
+    valid_o                     : out std_logic
     );
-end matmul;
+
+  attribute mult_style                       : string;
+  attribute mult_style of matmul : entity is "pipe_block";
+
+end entity matmul;
 
 architecture behave of matmul is
-  signal result_s               : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
-  signal a_s                    : t_record;
-  signal a, b                   : unsigned(g_b_width-1 downto 0) := (others =>'0');
-  signal r1, r2, r3, r4, r5, r6 : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
-  constant cnt_max              : integer := 3;
-  signal cnt                    : integer range 0 to cnt_max+1 := 0;
+
+  type pipe is array(g_levels-1 downto 0) of unsigned(2*g_c_width-1 downto 0);
+  type pipe_valid is array(g_levels-1 downto 0) of std_logic;
+
+signal valid_in     : std_logic                                      := '0';
+  signal product      : pipe                                         := (others => (others => '0'));
+  signal product_full : unsigned(2*g_c_width-1 downto 0)             := (others => '0');
+  signal valid        : pipe_valid                                   := (others => '0');
+  signal valid_full   : std_logic                                    := '0';
+  signal product_int  : unsigned(g_c_width-1 downto 0)               := (others => '0');
+  signal product_out  : unsigned(g_c_width-1 downto 0)               := (others => '0');
+  signal valid_int    : std_logic                                    := '0';
+  signal valid_out    : std_logic                                    := '0';
+
+  signal a, b         : unsigned(g_b_width-1 downto 0)               := (others =>'0');
 
 begin
+
+  -- Last stage of multiplication pipeline
+  product_full <= product(g_levels-1);
+  valid_full   <= valid(g_levels-1);
+
+
   matmul_process : process (clk_i) is
   begin
 
   if rising_edge(clk_i) then
-    if rst_n_i='0' then
-      cnt <= 0;
-      result_s <= (others =>'0');
-      c_o <= (others =>'0');
-    else
-      a <= a_s.r_a;
-      b <= b_i;
-      if v_i='1' then --
-        result_s <= result_s + a*b; -- The optimal number of pipeline stagies is 6
-        r1 <= result_s;
-        r2 <= r1;
-        r3 <= r2;
-        r4 <= r3;
-        r5 <= r4;
-        r6 <= r5;
-        cnt <= cnt + 1;
-        v_o <= '0';
-      end if;
 
-      if cnt=cnt_max then
-        c_o <= resize(result_s, c_o'length); -- Studies to round the output
-        cnt <= 0;
-        result_s <= (others =>'0');
-        v_o <= '1';
-      end if;
-    end if;
-  end if;
+    if rst_n_i='0' then
+      product_int <= (others => '0');
+      valid_int <= '0';
+    else
+    -- Instantiate a register before multiplier to improve speed
+      valid_in <= valid_i;
+      a <= a_i.r_a;
+      b <= b_i;
+
+      product(0) <= a*b;
+      valid(0) <= valid_in;
+
+      for n in 1 to g_levels-1 loop
+      product(n) <= product(n-1);
+      valid(n) <= valid(n-1);
+      end loop;
+
+      product_int <= resize(product_full, product_int'length);
+      -- Keep "valid_int" grouped with "product_int" so we don't forget to keep them synchronized
+      valid_int <= valid_full;
+
+      -- Output stage
+      product_out <= product_int;
+      valid_out <= valid_int;
+
+    end if; -- Reset
+  end if; -- Clock
 end process;
-  a_s <= a_i;
+  c_o <= product_out;
+  valid_o <= valid_out;
 end behave;

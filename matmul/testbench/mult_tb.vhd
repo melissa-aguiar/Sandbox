@@ -44,16 +44,28 @@ architecture behave of mult_tb is
 
   constant clk_period : time := 10 ns;
 
-  constant g_b_width  : natural := 32;
-  constant g_c_width  : natural := 32;
+  -- Width for input b[k]
+  constant g_b_width                   : natural := 32;
+  -- Width for output c
+  constant g_c_width                   : natural := 32;
+  -- Multiplier pipeline
+  constant g_levels                    : natural := 6;
 
-  signal clk_s        : std_logic := '0';
-  signal rst_s        : std_logic := '0';
-  signal v_i_s        : std_logic := '0';
-  signal a_s          : t_record;
-  signal b_s          : unsigned(g_b_width-1 downto 0) := (others => '0');
-  signal c_s          : unsigned(g_c_width-1 downto 0);
-  signal v_o_s        : std_logic := '0';
+
+  -- Core clock
+  signal clk_s                         : std_logic:= '0';
+  -- Reset
+  signal rst_s                         : std_logic := '0';
+  -- Data valid input
+  signal v_i_s                         : std_logic := '0';
+  -- Input a[k] and index k
+  signal a_s                           : t_record;
+  -- Input b[k]
+  signal b_s                           : unsigned(g_b_width-1 downto 0) := (others => '0');
+  -- Result output
+  signal c_s                           : unsigned(g_c_width-1 downto 0);
+  -- Data valid output
+  signal v_o_s                         : std_logic := '0';
 
 begin
 
@@ -61,11 +73,11 @@ begin
   port map (
     clk_i   => clk_s,
     rst_n_i => rst_s,
-    v_i     => v_i_s,
+    valid_i => v_i_s,
     a_i     => a_s,
     b_i     => b_s,
     c_o     => c_s,
-    v_o     => v_o_s
+    valid_o => v_o_s
     );
 
   clk_process : process is
@@ -92,11 +104,7 @@ begin
 
     wait for clk_period;
 
-    v_i_s <= '0';
-
     wait for clk_period;
-
-    v_i_s <= '1';
 
     a_s.r_a <= to_unsigned(3, a_s.r_a'length);
     a_s.r_k <= to_unsigned(0, a_s.r_k'length);
@@ -109,6 +117,8 @@ begin
 
     wait for clk_period;
 
+    v_i_s <= '0';
+
     a_s.r_a <= to_unsigned(2, a_s.r_a'length);
     a_s.r_k <= to_unsigned(1, a_s.r_k'length);
 
@@ -120,8 +130,18 @@ begin
     wait for clk_period;
     wait for clk_period;
 
-    if c_s = to_unsigned(6, c_s'length) then
+    if c_s = to_unsigned(1, c_s'length) then
         report "SUCESS";
+    elsif c_s = to_unsigned(2, c_s'length) then
+      report "SUCESS";
+    elsif c_s = to_unsigned(3, c_s'length) then
+      report "SUCESS";
+    elsif c_s = to_unsigned(6, c_s'length) then
+      report "SUCESS";
+    elsif c_s = to_unsigned(4, c_s'length) then
+      report "SUCESS";
+    elsif c_s = to_unsigned(2, c_s'length) then
+      report "SUCESS";
     else
         report "FAILURE";
     end if;

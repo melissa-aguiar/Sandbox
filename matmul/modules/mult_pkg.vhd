@@ -43,27 +43,29 @@ package mult_pkg is
   end record;
 
   component matmul is
-    generic(
-      -- Width for input b[k]
-      g_b_width                 : natural := 32;
-      -- Width for output c
-      g_c_width                 : natural := 32
-      );
-    port(
-      -- Core clock
-      clk_i                     : in std_logic;
-      -- Reset
-      rst_n_i                   : in std_logic;
-      -- Data valid input
-      v_i                       : in std_logic;
-      -- Input a[k] and index k
-      a_i                       : in t_record;
-      -- Input b[k]
-      b_i                       : in unsigned(g_b_width-1 downto 0);
-      -- Result output
-      c_o                       : out unsigned(g_c_width-1 downto 0);
-      -- Data valid output
-      v_o                       : out std_logic
-      );
+  generic(
+    -- Width for input b[k]
+    g_b_width                   : natural := 32;
+    -- Width for output c
+    g_c_width                   : natural := 32;
+    -- Multiplier pipeline
+    g_levels                    : natural := 6
+    );
+  port (
+    -- Core clock
+    clk_i                       : in std_logic;
+    -- Reset
+    rst_n_i                     : in std_logic;
+    -- Data valid input
+    valid_i                     : in std_logic;
+    -- Input a[k] and index k
+    a_i                         : in t_record;
+    -- Input b[k]
+    b_i                         : in unsigned(g_b_width-1 downto 0);
+    -- Result output
+    c_o                         : out unsigned(g_c_width-1 downto 0);
+    -- Data valid output
+    valid_o                     : out std_logic
+    );
   end component;
 end package mult_pkg;
