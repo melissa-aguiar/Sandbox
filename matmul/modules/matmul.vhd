@@ -63,12 +63,16 @@ entity matmul is
 end matmul;
 
 architecture behave of matmul is
-  signal a_s                    : t_record;
-  signal result_s               : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
-  signal a, b                   : unsigned(g_b_width-1 downto 0)   := (others =>'0');
-  signal r1, r2, r3, r4, r5, r6 : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
-  constant cnt_max              : integer                          := 3;
-  signal cnt                    : integer range 0 to cnt_max+1     := 0;
+
+  attribute use_dsp : string;
+  attribute use_dsp of behave : architecture is "yes";
+
+  signal a_s                     : t_record;
+  signal result_s, prod_s, p, p1 : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
+  signal a, b                    : unsigned(g_b_width-1 downto 0)   := (others =>'0');
+  signal r1, r2, r3, r4, r5, r6  : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
+  constant cnt_max               : integer                          := 3;
+  signal cnt                     : integer range 0 to cnt_max+1     := 0;
 
 begin
   matmul_process : process (clk_i) is
@@ -78,18 +82,16 @@ begin
     if rst_n_i = '0' then
       cnt <= 0;
       result_s <= (others =>'0');
+      prod_s <= (others =>'0');
       c_o <= (others =>'0');
     else
       a <= a_i.r_a;
       b <= b_i;
       if v_i = '1' then
-        result_s <= result_s + a*b; -- The optimal number of pipeline stagies is 6
-        r1 <= result_s;
-        r2 <= r1;
-        r3 <= r2;
-        r4 <= r3;
-        r5 <= r4;
-        r6 <= r5;
+        prod_s <= a*b;
+        r1 <= result_s; 
+        result_s <= result_s + prod_s; -- The optimal number of pipeline stagies is 6
+        
         cnt <= cnt + 1;
         v_o <= '0';
       end if;
