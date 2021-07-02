@@ -52,7 +52,7 @@ entity matmul is
     -- Reset
     rst_n_i                     : in std_logic;
     -- Clear
-    clr_n_i                     : in std_logic;
+    clr_p_i                     : in std_logic;
     -- Data valid input
     v_i                         : in std_logic;
     -- Input a[k]
@@ -70,32 +70,43 @@ architecture behave of matmul is
 
   attribute use_dsp : string;
   attribute use_dsp of behave    : architecture is "yes";
-
-  signal result_s, prod_s, prod  : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
-  signal a_s, b_s                : unsigned(g_b_width-1 downto 0)   := (others =>'0');
+  
+  -- Registers for intermediate values
+  signal m_reg_s, m1_reg_s, adder_out_s, old_result_s   : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
+  signal a_reg_s, b_reg_s                               : unsigned(g_b_width-1 downto 0)   := (others =>'0');
+  signal clr_reg_s                                      : std_logic;
 
 begin
-  matmul_process : process (clk_i) is
-  begin
-
-  if rising_edge(clk_i) then
-    if (rst_n_i = '0') then
-      result_s <= (others =>'0');
-      prod_s <= (others =>'0');
+  process (adder_out_s, clr_reg_s)
+	begin
+	if (clr_reg_s = '1') then
+      -- Clear the accumulated data
+      old_result_s <= (others => '0');
     else
-      a_s <= a_i;
-      b_s <= b_i;
+      -- Update old result
+      old_result_s <= adder_out_s;
+    end if;
+  end process;
 
-      prod_s <= a_s*b_s;
-      prod <= prod_s;
-      
-      result_s <= result_s + prod;
- 
-      if (clr_n_i = '0') then
-        result_s <= (others =>'0');
-      end if;
-    end if; -- Reset
-  end if; -- Clock
-end process;
-  c_o <= resize(result_s, c_o'length);
+  process (clk_i)
+  begin
+	if (rising_edge(clk_i)) then
+	
+	if rst_n_i = '0' then
+	  adder_out_s <= (others => '0');
+	else
+      a_reg_s <= a_i;
+	  b_reg_s <= b_i;
+	  m1_reg_s <= a_reg_s * b_reg_s;
+	  m_reg_s <= m1_reg_s;
+	  clr_reg_s <= clr_p_i;
+			
+	  -- Store accumulation result in a register
+      adder_out_s <= old_result_s + m_reg_s;
+    end if;
+    end if;
+  end process;
+  
+  c_o <= resize(adder_out_s, c_o'length);
+  
 end behave;

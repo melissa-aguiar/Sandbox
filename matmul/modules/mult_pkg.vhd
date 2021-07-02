@@ -51,7 +51,7 @@ package mult_pkg is
       -- Reset
       rst_n_i                   : in std_logic;
       -- Clear
-      clr_n_i                   : in std_logic;
+      clr_p_i                     : in std_logic;
       -- Data valid input
       v_i                       : in std_logic;
       -- Input a[k]
