@@ -36,14 +36,10 @@ use ieee.numeric_std.all;
 
 package mult_pkg is
 
-  type t_record is
-  record
-    r_a : unsigned(32-1 downto 0); -- value of input a[k]
-    r_k : unsigned(32-1 downto 0); -- value of index k
-  end record;
-
   component matmul is
     generic(
+      -- Width for input a[k]
+      g_a_width                 : natural := 32;
       -- Width for input b[k]
       g_b_width                 : natural := 32;
       -- Width for output c
@@ -54,10 +50,12 @@ package mult_pkg is
       clk_i                     : in std_logic;
       -- Reset
       rst_n_i                   : in std_logic;
+      -- Clear
+      clr_n_i                   : in std_logic;
       -- Data valid input
       v_i                       : in std_logic;
-      -- Input a[k] and index k
-      a_i                       : in t_record;
+      -- Input a[k]
+      a_i                       : in unsigned(g_a_width-1 downto 0);
       -- Input b[k]
       b_i                       : in unsigned(g_b_width-1 downto 0);
       -- Result output

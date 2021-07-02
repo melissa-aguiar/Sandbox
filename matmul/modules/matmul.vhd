@@ -39,6 +39,8 @@ use work.mult_pkg.all;
 
 entity matmul is
   generic(
+    -- Width for input a[k]
+    g_a_width                   : natural := 32;
     -- Width for input b[k]
     g_b_width                   : natural := 32;
     -- Width for output c
@@ -49,10 +51,12 @@ entity matmul is
     clk_i                       : in std_logic;
     -- Reset
     rst_n_i                     : in std_logic;
+    -- Clear
+    clr_n_i                     : in std_logic;
     -- Data valid input
     v_i                         : in std_logic;
-    -- Input a[k] and index k
-    a_i                         : in t_record;
+    -- Input a[k]
+    a_i                         : in unsigned(g_a_width-1 downto 0);
     -- Input b[k]
     b_i                         : in unsigned(g_b_width-1 downto 0);
     -- Result output
@@ -65,44 +69,33 @@ end matmul;
 architecture behave of matmul is
 
   attribute use_dsp : string;
-  attribute use_dsp of behave : architecture is "yes";
+  attribute use_dsp of behave    : architecture is "yes";
 
-  signal a_s                     : t_record;
-  signal result_s, prod_s, p, p1 : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
-  signal a, b                    : unsigned(g_b_width-1 downto 0)   := (others =>'0');
-  signal r1, r2, r3, r4, r5, r6  : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
-  constant cnt_max               : integer                          := 3;
-  signal cnt                     : integer range 0 to cnt_max+1     := 0;
+  signal result_s, prod_s, prod  : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
+  signal a_s, b_s                : unsigned(g_b_width-1 downto 0)   := (others =>'0');
 
 begin
   matmul_process : process (clk_i) is
   begin
 
   if rising_edge(clk_i) then
-    if rst_n_i = '0' then
-      cnt <= 0;
+    if (rst_n_i = '0') then
       result_s <= (others =>'0');
       prod_s <= (others =>'0');
-      c_o <= (others =>'0');
     else
-      a <= a_i.r_a;
-      b <= b_i;
-      if v_i = '1' then
-        prod_s <= a*b;
-        r1 <= result_s; 
-        result_s <= result_s + prod_s; -- The optimal number of pipeline stagies is 6
-        
-        cnt <= cnt + 1;
-        v_o <= '0';
-      end if;
+      a_s <= a_i;
+      b_s <= b_i;
 
-      if cnt = cnt_max then
-        c_o <= resize(result_s, c_o'length); -- Studies to round the output
+      prod_s <= a_s*b_s;
+      prod <= prod_s;
+      
+      result_s <= result_s + prod;
+ 
+      if (clr_n_i = '0') then
         result_s <= (others =>'0');
-        cnt <= 0;
-        v_o <= '1';
       end if;
-    end if;
-  end if;
+    end if; -- Reset
+  end if; -- Clock
 end process;
+  c_o <= resize(result_s, c_o'length);
 end behave;
