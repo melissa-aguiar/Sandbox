@@ -73,16 +73,15 @@ architecture behave of matmul is
   -- Registers for intermediate values
   signal mult_reg_s, adder_out_s, old_result_s   : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
   signal a_reg_s, b_reg_s                        : unsigned(g_b_width-1 downto 0)   := (others =>'0');
-  signal clr_reg_s                               : std_logic;
+  signal clr_reg_s, valid_reg_s                  : std_logic;
 
 begin
-
   process (adder_out_s, clr_reg_s)
   begin
     if (clr_reg_s = '1') then
       -- Clear the accumulated data
       old_result_s <= (others => '0');
-      -- Validating the last output before it's cleared
+      -- Validating the last result to output before it's cleared
       valid_o <= '1';
     else
       -- Update old result
@@ -97,7 +96,7 @@ begin
     if (rising_edge(clk_i)) then
       if rst_n_i = '0' then
         adder_out_s <= (others => '0');
-      else
+      elsif(valid_reg_s = '1') then
         -- Store the inputs in a register
         a_reg_s <= a_i; -- The inputs must have a valid bit
         b_reg_s <= b_i;
@@ -111,5 +110,6 @@ begin
     end if;
   end process;
   -- Truncate the output
-  c_o <= resize(adder_out_s, c_o'length); -- The output must have a valid bit
+  c_o <= resize(adder_out_s, c_o'length);
+  valid_reg_s <= valid_i;
 end behave;

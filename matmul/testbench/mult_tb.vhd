@@ -42,11 +42,11 @@ end mult_tb;
 
 architecture behave of mult_tb is
 
-  constant clk_period : time := 10 ns;
+  constant clk_period : time      := 10 ns;
 
-  constant g_a_width  : natural := 32;
-  constant g_b_width  : natural := 32;
-  constant g_c_width  : natural := 32;
+  constant g_a_width  : natural   := 32;
+  constant g_b_width  : natural   := 32;
+  constant g_c_width  : natural   := 32;
 
   signal clk_s        : std_logic := '0';
   signal rst_s        : std_logic := '0';
@@ -80,11 +80,11 @@ begin
   process
   begin
 
-
     rst_s <= '1';
 
     clr_s <= '1';
 
+    v_i_s <= '1';
     a_s <= to_unsigned(1, a_s'length);
     b_s <= to_unsigned(1, b_s'length);
 
@@ -92,27 +92,36 @@ begin
 
     clr_s <= '0';
 
+    v_i_s <= '1';
     a_s <= to_unsigned(2, a_s'length);
 
     wait for clk_period;
 
+    v_i_s <= '0';
+    a_s <= to_unsigned(3, a_s'length);
+
+    wait for clk_period;
+    
+    v_i_s <= '1';
     a_s <= to_unsigned(3, a_s'length);
 
     wait for clk_period;
 
+    v_i_s <= '1';
     a_s <= to_unsigned(3, a_s'length);
     b_s <= to_unsigned(2, b_s'length);
 
     wait for clk_period;
 
+    v_i_s <= '1';
     a_s <= to_unsigned(2, a_s'length);
 
     wait for clk_period;
 
+    v_i_s <= '1';
     a_s <= to_unsigned(1, a_s'length);
 
     wait for clk_period;
-
 
 --    if c_s = to_unsigned(18, c_s'length) then
 --      report "SUCESS";
