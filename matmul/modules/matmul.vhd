@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-01-07  1.0      melissa.aguiar        Created
+-- 2021-02-07  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ entity matmul is
     -- Clear
     clr_p_i                     : in std_logic;
     -- Data valid input
-    v_i                         : in std_logic;
+    valid_i                     : in std_logic;
     -- Input a[k]
     a_i                         : in unsigned(g_a_width-1 downto 0);
     -- Input b[k]
@@ -62,51 +62,54 @@ entity matmul is
     -- Result output
     c_o                         : out unsigned(g_c_width-1 downto 0);
     -- Data valid output
-    v_o                         : out std_logic
+    valid_o                     : out std_logic
     );
 end matmul;
 
 architecture behave of matmul is
-
-  attribute use_dsp : string;
-  attribute use_dsp of behave    : architecture is "yes";
-  
+  -- Attribute to use DSP
+  attribute use_dsp                              : string;
+  attribute use_dsp of behave                    : architecture is "yes";
   -- Registers for intermediate values
-  signal m_reg_s, m1_reg_s, adder_out_s, old_result_s   : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
-  signal a_reg_s, b_reg_s                               : unsigned(g_b_width-1 downto 0)   := (others =>'0');
-  signal clr_reg_s                                      : std_logic;
+  signal mult_reg_s, adder_out_s, old_result_s   : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
+  signal a_reg_s, b_reg_s                        : unsigned(g_b_width-1 downto 0)   := (others =>'0');
+  signal clr_reg_s                               : std_logic;
 
 begin
+
   process (adder_out_s, clr_reg_s)
-	begin
-	if (clr_reg_s = '1') then
+  begin
+    if (clr_reg_s = '1') then
       -- Clear the accumulated data
       old_result_s <= (others => '0');
+      -- Validating the last output before it's cleared
+      valid_o <= '1';
     else
       -- Update old result
       old_result_s <= adder_out_s;
+      -- The output is not valid yet
+      valid_o <= '0';
     end if;
   end process;
 
   process (clk_i)
   begin
-	if (rising_edge(clk_i)) then
-	
-	if rst_n_i = '0' then
-	  adder_out_s <= (others => '0');
-	else
-      a_reg_s <= a_i;
-	  b_reg_s <= b_i;
-	  m1_reg_s <= a_reg_s * b_reg_s;
-	  m_reg_s <= m1_reg_s;
-	  clr_reg_s <= clr_p_i;
-			
-	  -- Store accumulation result in a register
-      adder_out_s <= old_result_s + m_reg_s;
-    end if;
+    if (rising_edge(clk_i)) then
+      if rst_n_i = '0' then
+        adder_out_s <= (others => '0');
+      else
+        -- Store the inputs in a register
+        a_reg_s <= a_i; -- The inputs must have a valid bit
+        b_reg_s <= b_i;
+        -- Store multiplication result in a register
+        mult_reg_s <= a_reg_s * b_reg_s;
+        -- Store clear in a register
+        clr_reg_s <= clr_p_i;
+        -- Store accumulation result in a register
+        adder_out_s <= old_result_s + mult_reg_s;
+      end if;
     end if;
   end process;
-  
-  c_o <= resize(adder_out_s, c_o'length);
-  
+  -- Truncate the output
+  c_o <= resize(adder_out_s, c_o'length); -- The output must have a valid bit
 end behave;

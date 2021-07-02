@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-30-06  1.0      melissa.aguiar        Created
+-- 2021-02-07  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -50,12 +50,12 @@ architecture behave of mult_tb is
 
   signal clk_s        : std_logic := '0';
   signal rst_s        : std_logic := '0';
-  signal clr_s        : std_logic;
+  signal clr_s        : std_logic := '1';
   signal v_i_s        : std_logic := '0';
+  signal v_o_s        : std_logic := '0';
   signal a_s          : unsigned(g_a_width-1 downto 0) := (others => '0');
   signal b_s          : unsigned(g_b_width-1 downto 0) := (others => '0');
   signal c_s          : unsigned(g_c_width-1 downto 0);
-  signal v_o_s        : std_logic := '0';
 
 begin
 
@@ -64,11 +64,11 @@ begin
     clk_i   => clk_s,
     rst_n_i => rst_s,
     clr_p_i => clr_s,
-    v_i     => v_i_s,
+    valid_i => v_i_s,
     a_i     => a_s,
     b_i     => b_s,
     c_o     => c_s,
-    v_o     => v_o_s
+    valid_o => v_o_s
     );
 
   clk_process : process is
@@ -79,8 +79,8 @@ begin
 
   process
   begin
-    
-    
+
+
     rst_s <= '1';
 
     clr_s <= '1';
@@ -89,7 +89,7 @@ begin
     b_s <= to_unsigned(1, b_s'length);
 
     wait for clk_period;
-    
+
     clr_s <= '0';
 
     a_s <= to_unsigned(2, a_s'length);
@@ -110,17 +110,15 @@ begin
     wait for clk_period;
 
     a_s <= to_unsigned(1, a_s'length);
-    
-    wait for clk_period;
-    
 
     wait for clk_period;
 
-    --if c_s = to_unsigned(6, c_s'length) then -- 1*1 + 2*1 + 3*1
-    --  report "SUCESS";
-    --else
-    --    report "FAILURE";
-    --end if;
+
+--    if c_s = to_unsigned(18, c_s'length) then
+--      report "SUCESS";
+--    else
+--        report "FAILURE";
+--    end if;
 
   end process;
 
