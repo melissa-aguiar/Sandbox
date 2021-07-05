@@ -69,9 +69,6 @@ entity matmul is
 end matmul;
 
 architecture behave of matmul is
-  -- Attribute to use DSP
-  attribute use_dsp                              : string;
-  attribute use_dsp of behave                    : architecture is "yes";
   -- Registers for intermediate values
   signal mult_reg_s                              : signed(2*g_c_width-1 downto 0)               := (others =>'0');
   signal adder_out_s, adder_reg1_s, adder_reg2   : signed(2*g_c_width+g_extra_width-1 downto 0) := (others =>'0');
