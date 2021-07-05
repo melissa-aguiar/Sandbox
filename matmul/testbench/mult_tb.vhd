@@ -53,22 +53,22 @@ architecture behave of mult_tb is
   signal clr_s        : std_logic := '1';
   signal v_i_s        : std_logic := '0';
   signal v_o_s        : std_logic := '0';
-  signal a_s          : unsigned(g_a_width-1 downto 0) := (others => '0');
-  signal b_s          : unsigned(g_b_width-1 downto 0) := (others => '0');
-  signal c_s          : unsigned(g_c_width-1 downto 0);
+  signal a_s          : signed(g_a_width-1 downto 0) := (others => '0');
+  signal b_s          : signed(g_b_width-1 downto 0) := (others => '0');
+  signal c_s          : signed(g_c_width-1 downto 0);
 
 begin
 
   matmul_INST : matmul
   port map (
-    clk_i   => clk_s,
-    rst_n_i => rst_s,
-    clr_p_i => clr_s,
-    valid_i => v_i_s,
-    a_i     => a_s,
-    b_i     => b_s,
-    c_o     => c_s,
-    valid_o => v_o_s
+    clk_i       => clk_s,
+    rst_n_i     => rst_s,
+    clear_acc_i => clr_s,
+    valid_i    => v_i_s,
+    a_i        => a_s,
+    b_i        => b_s,
+    c_o        => c_s,
+    valid_o    => v_o_s
     );
 
   clk_process : process is
@@ -82,48 +82,48 @@ begin
 
     rst_s <= '1';
 
-    clr_s <= '1';
-
-    v_i_s <= '1';
-    a_s <= to_unsigned(1, a_s'length);
-    b_s <= to_unsigned(1, b_s'length);
-
-    wait for clk_period;
-
     clr_s <= '0';
 
     v_i_s <= '1';
-    a_s <= to_unsigned(2, a_s'length);
+    a_s <= to_signed(1, a_s'length);
+    b_s <= to_signed(1, b_s'length);
 
     wait for clk_period;
 
     v_i_s <= '0';
-    a_s <= to_unsigned(3, a_s'length);
-
-    wait for clk_period;
-    
-    v_i_s <= '1';
-    a_s <= to_unsigned(3, a_s'length);
+    a_s <= to_signed(2, a_s'length);
 
     wait for clk_period;
 
     v_i_s <= '1';
-    a_s <= to_unsigned(3, a_s'length);
-    b_s <= to_unsigned(2, b_s'length);
+    a_s <= to_signed(3, a_s'length);
 
     wait for clk_period;
 
-    v_i_s <= '1';
-    a_s <= to_unsigned(2, a_s'length);
+    v_i_s <= '0';
+    a_s <= to_signed(3, a_s'length);
 
     wait for clk_period;
 
-    v_i_s <= '1';
-    a_s <= to_unsigned(1, a_s'length);
+    v_i_s <= '0';
+    a_s <= to_signed(3, a_s'length);
+    b_s <= to_signed(2, b_s'length);
 
     wait for clk_period;
 
---    if c_s = to_unsigned(18, c_s'length) then
+    v_i_s <= '0';
+    a_s <= to_signed(2, a_s'length);
+
+    wait for clk_period;
+
+    v_i_s <= '0';
+    a_s <= to_signed(1, a_s'length);
+
+    clr_s <= '1';
+    wait for clk_period;
+    clr_s <= '0';
+
+--    if c_s = to_signed(18, c_s'length) then
 --      report "SUCESS";
 --    else
 --        report "FAILURE";

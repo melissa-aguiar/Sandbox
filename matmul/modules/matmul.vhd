@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-02-07  1.0      melissa.aguiar        Created
+-- 2021-04-07  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -44,23 +44,25 @@ entity matmul is
     -- Width for input b[k]
     g_b_width                   : natural := 32;
     -- Width for output c
-    g_c_width                   : natural := 32
+    g_c_width                   : natural := 32;
+    -- Extra bits for accumulator
+    g_extra_width               : natural := 4
   );
   port (
     -- Core clock
     clk_i                       : in std_logic;
-    -- Reset
+    -- Reset all pipeline stages
     rst_n_i                     : in std_logic;
-    -- Clear
-    clr_p_i                     : in std_logic;
+    -- Clear the accumulator
+    clear_acc_i                 : in std_logic;
     -- Data valid input
     valid_i                     : in std_logic;
     -- Input a[k]
-    a_i                         : in unsigned(g_a_width-1 downto 0);
+    a_i                         : in signed(g_a_width-1 downto 0);
     -- Input b[k]
-    b_i                         : in unsigned(g_b_width-1 downto 0);
+    b_i                         : in signed(g_b_width-1 downto 0);
     -- Result output
-    c_o                         : out unsigned(g_c_width-1 downto 0);
+    c_o                         : out signed(g_c_width-1 downto 0);
     -- Data valid output
     valid_o                     : out std_logic
     );
@@ -71,45 +73,42 @@ architecture behave of matmul is
   attribute use_dsp                              : string;
   attribute use_dsp of behave                    : architecture is "yes";
   -- Registers for intermediate values
-  signal mult_reg_s, adder_out_s, old_result_s   : unsigned(2*g_c_width-1 downto 0) := (others =>'0');
-  signal a_reg_s, b_reg_s                        : unsigned(g_b_width-1 downto 0)   := (others =>'0');
-  signal clr_reg_s, valid_reg_s                  : std_logic;
+  signal mult_reg_s                              : signed(2*g_c_width-1 downto 0)               := (others =>'0');
+  signal adder_out_s, adder_reg1_s, adder_reg2   : signed(2*g_c_width+g_extra_width-1 downto 0) := (others =>'0');
+  signal a_reg_s, b_reg_s                        : signed(g_b_width-1 downto 0)                 := (others =>'0');
+  -- Registers for bit valid
+  signal valid1_s, valid2_s, valid3_s            : std_logic;
 
 begin
-  process (adder_out_s, clr_reg_s)
-  begin
-    if (clr_reg_s = '1') then
-      -- Clear the accumulated data
-      old_result_s <= (others => '0');
-      -- Validating the last result to output before it's cleared
-      valid_o <= '1';
-    else
-      -- Update old result
-      old_result_s <= adder_out_s;
-      -- The output is not valid yet
-      valid_o <= '0';
-    end if;
-  end process;
-
   process (clk_i)
   begin
     if (rising_edge(clk_i)) then
       if rst_n_i = '0' then
-        adder_out_s <= (others => '0');
-      elsif(valid_reg_s = '1') then
-        -- Store the inputs in a register
-        a_reg_s <= a_i; -- The inputs must have a valid bit
-        b_reg_s <= b_i;
-        -- Store multiplication result in a register
-        mult_reg_s <= a_reg_s * b_reg_s;
-        -- Store clear in a register
-        clr_reg_s <= clr_p_i;
-        -- Store accumulation result in a register
-        adder_out_s <= old_result_s + mult_reg_s;
-      end if;
-    end if;
+        -- Clear all pipeline stages
+        mult_reg_s   <= (others => '0');
+        adder_out_s  <= (others => '0');
+        elsif (clear_acc_i = '1') then
+          -- Clear the accumulated data
+          adder_out_s <= (others => '0');
+        else
+          -- Pipeline stage 1: Store the inputs in a register
+          a_reg_s <= a_i;
+          b_reg_s <= b_i;
+          valid1_s <= valid_i;
+          -- Pipeline stage 2: Store multiplication result in a register
+          mult_reg_s <= a_reg_s * b_reg_s;
+          valid2_s <= valid1_s;
+          -- Pipeline stage 3: Store accumulation result in a register
+          adder_out_s <= adder_out_s + mult_reg_s;
+          -- Registers to fully pipeline the DSP cascade
+          adder_reg1_s <= adder_out_s;
+          adder_reg2 <= adder_reg1_s;
+          valid3_s <= valid2_s;
+      end if; -- Reset
+      -- Update valid output
+      valid_o <= valid3_s;
+      -- Truncate the output
+      c_o <= resize(adder_out_s, c_o'length);
+    end if; -- Clock
   end process;
-  -- Truncate the output
-  c_o <= resize(adder_out_s, c_o'length);
-  valid_reg_s <= valid_i;
 end behave;

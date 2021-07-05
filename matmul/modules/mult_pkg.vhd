@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-02-07  1.0      melissa.aguiar        Created
+-- 2021-04-07  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -51,15 +51,15 @@ package mult_pkg is
       -- Reset
       rst_n_i                   : in std_logic;
       -- Clear
-      clr_p_i                   : in std_logic;
+      clear_acc_i               : in std_logic;
       -- Data valid input
       valid_i                   : in std_logic;
       -- Input a[k]
-      a_i                       : in unsigned(g_a_width-1 downto 0);
+      a_i                       : in signed(g_a_width-1 downto 0);
       -- Input b[k]
-      b_i                       : in unsigned(g_b_width-1 downto 0);
+      b_i                       : in signed(g_b_width-1 downto 0);
       -- Result output
-      c_o                       : out unsigned(g_c_width-1 downto 0);
+      c_o                       : out signed(g_c_width-1 downto 0);
       -- Data valid output
       valid_o                   : out std_logic
       );
