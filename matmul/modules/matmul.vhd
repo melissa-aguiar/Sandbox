@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-04-07  1.0      melissa.aguiar        Created
+-- 2021-07-07  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -38,6 +38,7 @@ library work;
 use work.mult_pkg.all;
 
 entity matmul is
+
   generic(
     -- Width for input a[k]
     g_a_width                   : natural := 32;
@@ -48,6 +49,7 @@ entity matmul is
     -- Extra bits for accumulator
     g_extra_width               : natural := 4
   );
+
   port (
     -- Core clock
     clk_i                       : in std_logic;
@@ -69,43 +71,72 @@ entity matmul is
 end matmul;
 
 architecture behave of matmul is
+  -- Registers for input values
+  signal a_reg_s, b_reg_s                         : signed(g_b_width-1 downto 0)                 := (others =>'0');
   -- Registers for intermediate values
-  signal mult_reg_s                              : signed(2*g_c_width-1 downto 0)               := (others =>'0');
-  signal adder_out_s, adder_reg1_s, adder_reg2   : signed(2*g_c_width+g_extra_width-1 downto 0) := (others =>'0');
-  signal a_reg_s, b_reg_s                        : signed(g_b_width-1 downto 0)                 := (others =>'0');
+  signal mult_reg_s                               : signed(2*g_c_width-1 downto 0)               := (others =>'0');
+  signal adder_out_s, adder_reg1_s, adder_reg2_s  : signed(2*g_c_width+g_extra_width-1 downto 0) := (others =>'0');
   -- Registers for bit valid
-  signal valid1_s, valid2_s, valid3_s            : std_logic;
+  signal valid_reg1_s, valid_reg2_s, valid_reg3_s : std_logic;
+  signal valid_reg4_s, valid_reg5_s               : std_logic;
 
 begin
-  process (clk_i)
+  MAC : process (clk_i)
   begin
     if (rising_edge(clk_i)) then
+
       if rst_n_i = '0' then
-        -- Clear all pipeline stages
+        -- Clear all registers
+        a_reg_s      <= (others => '0');
+        b_reg_s      <= (others => '0');
         mult_reg_s   <= (others => '0');
         adder_out_s  <= (others => '0');
+        adder_reg1_s <= (others => '0');
+        adder_reg2_s <= (others => '0');
+        valid_reg1_s <= '0';
+        valid_reg2_s <= '0';
+        valid_reg3_s <= '0';
+        valid_reg4_s <= '0';
+        valid_reg5_s <= '0';
+
         elsif (clear_acc_i = '1') then
-          -- Clear the accumulated data
+          -- Clear data from accumulator
           adder_out_s <= (others => '0');
+
         else
           -- Pipeline stage 1: Store the inputs in a register
           a_reg_s <= a_i;
           b_reg_s <= b_i;
-          valid1_s <= valid_i;
+          -- Store the valid bit from stage 1 in a register
+          valid_reg1_s <= valid_i;
+
           -- Pipeline stage 2: Store multiplication result in a register
           mult_reg_s <= a_reg_s * b_reg_s;
-          valid2_s <= valid1_s;
+          -- Store the valid bit from stage 2 in a register
+          valid_reg2_s <= valid_reg1_s;
+
           -- Pipeline stage 3: Store accumulation result in a register
           adder_out_s <= adder_out_s + mult_reg_s;
-          -- Registers to fully pipeline the DSP cascade
+          -- Store the valid bit from stage 3 in a register
+          valid_reg3_s <= valid_reg2_s;
+
+          -- Pipeline stage 4: Register the accumulation to fully pipeline the DSP cascade
           adder_reg1_s <= adder_out_s;
-          adder_reg2 <= adder_reg1_s;
-          valid3_s <= valid2_s;
+          -- Store the valid bit from stage 4 in a register
+          valid_reg4_s <= valid_reg3_s;
+
+          -- Pipeline stage 5: Register the accumulation to fully pipeline the DSP cascade
+          adder_reg2_s <= adder_reg1_s;
+          -- Store the valid bit from stage 5 in a register
+          valid_reg5_s <= valid_reg4_s;
       end if; -- Reset
-      -- Update valid output
-      valid_o <= valid3_s;
+
       -- Truncate the output
-      c_o <= resize(adder_out_s, c_o'length);
+      c_o <= resize(adder_reg2_s, c_o'length);
+      -- Update valid output
+      valid_o <= valid_reg5_s;
+
     end if; -- Clock
-  end process;
-end behave;
+  end process MAC;
+
+end architecture behave;

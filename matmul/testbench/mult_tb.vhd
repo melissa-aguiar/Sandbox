@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-02-07  1.0      melissa.aguiar        Created
+-- 2021-07-07  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -95,7 +95,7 @@ begin
 
     wait for clk_period;
 
-    v_i_s <= '1';
+    v_i_s <= '0';
     a_s <= to_signed(3, a_s'length);
 
     wait for clk_period;
