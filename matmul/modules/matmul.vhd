@@ -135,8 +135,6 @@ begin
       c_o <= resize(adder_reg2_s, c_o'length);
       -- Update valid output
       valid_o <= valid_reg5_s;
-
     end if; -- Clock
   end process MAC;
-
 end architecture behave;
