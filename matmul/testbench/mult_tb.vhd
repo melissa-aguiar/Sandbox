@@ -106,4 +106,18 @@ begin
       end if;
   end process input_read;
 
+  output_write : process(clk_s)
+    file ouput_file   : text open write_mode is "my_output.txt";
+    variable cur_line : line;
+    variable data     : integer;
+    begin
+
+      if v_o_s='1' then
+      data := to_integer(c_s);
+
+        write(cur_line, data);
+        writeline(ouput_file, cur_line);
+      end if;
+  end process output_write;
+
 end behave;
