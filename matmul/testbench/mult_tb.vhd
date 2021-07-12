@@ -102,19 +102,20 @@ begin
     begin
       if rising_edge(clk_s) then
         rst_s <= '1';
-
         if not endfile(a_data_file) and valid_tr = '1' then
+          -- Reading input a[k] from a txt file
           readline(a_data_file, a_line);
           read(a_line, a_datain);
-
+          -- Reading input b[k] from a txt file
           readline(b_data_file, b_line);
           read(b_line, b_datain);
-
+          -- Pass the variable to a signal
           a_s.r_a <= to_signed(a_datain, a_s.r_a'length);
           b_s     <= to_signed(b_datain, b_s'length);
-
+          -- Update valid input bit
           v_i_s <= '1';
         else
+        -- Update valid input bit
           v_i_s <= '0';
         end if;
       end if;
@@ -125,12 +126,11 @@ begin
     variable c_line   : line;
     variable dataout  : integer;
     begin
-
       if rising_edge(clk_s) then
+        -- Write output to a txt file
         dataout := to_integer(c_s);
-
         write(c_line, dataout);
         writeline(ouput_file, c_line);
       end if;
   end process output_write;
-end behave;
+  end architecture behave;

@@ -84,7 +84,6 @@ begin
   MAC : process (clk_i)
   begin
     if (rising_edge(clk_i)) then
-
       if rst_n_i = '0' then
         -- Clear all registers
         a_reg_s      <= (others => '0');
@@ -131,6 +130,7 @@ begin
           valid_reg5_s <= valid_reg4_s;
 
         elsif (valid_i = '0') then
+          -- Store the bit valid
           valid_reg1_s <= valid_i;
           valid_reg2_s <= valid_reg1_s;
           valid_reg3_s <= valid_reg2_s;
