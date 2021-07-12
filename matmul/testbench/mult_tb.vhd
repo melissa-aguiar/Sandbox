@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-07-07  1.0      melissa.aguiar        Created
+-- 2021-12-07  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -60,6 +60,8 @@ architecture behave of mult_tb is
   signal b_s          : signed(g_b_width-1 downto 0) := (others => '0');
   signal c_s          : signed(g_c_width-1 downto 0);
 
+  signal valid_tr     : std_logic;
+
 begin
 
   mac_fofb_INST : mac_fofb
@@ -79,6 +81,19 @@ begin
     clk_s <= not clk_s;
   end process clk_process;
 
+  valid_tr_gen : process
+  begin
+  if rst_s = '1' then
+      valid_tr <= '0';
+      wait for clk_period;
+      valid_tr <= '1';
+      wait for clk_period;
+    else
+      valid_tr <= '0';
+      wait for clk_period;
+    end if;
+  end process;
+
   input_read : process(clk_s)
     file a_data_file            : text open read_mode is "a_k.txt";
     file b_data_file            : text open read_mode is "b_k.txt";
@@ -87,9 +102,8 @@ begin
     begin
       if rising_edge(clk_s) then
         rst_s <= '1';
-        v_i_s <= '1';
 
-        if not endfile(a_data_file) then
+        if not endfile(a_data_file) and valid_tr = '1' then
           readline(a_data_file, a_line);
           read(a_line, a_datain);
 
@@ -108,16 +122,15 @@ begin
 
   output_write : process(clk_s)
     file ouput_file   : text open write_mode is "my_output.txt";
-    variable cur_line : line;
-    variable data     : integer;
+    variable c_line   : line;
+    variable dataout  : integer;
     begin
 
-      if v_o_s='1' then
-      data := to_integer(c_s);
+      if rising_edge(clk_s) then
+        dataout := to_integer(c_s);
 
-        write(cur_line, data);
-        writeline(ouput_file, cur_line);
+        write(c_line, dataout);
+        writeline(ouput_file, c_line);
       end if;
   end process output_write;
-
 end behave;

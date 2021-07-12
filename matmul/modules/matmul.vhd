@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-07-07  1.0      melissa.aguiar        Created
+-- 2021-12-07  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -103,7 +103,7 @@ begin
           -- Clear data from accumulator
           adder_out_s <= (others => '0');
 
-        else
+        elsif (valid_i = '1') then
           -- Pipeline stage 1: Store the inputs in a register
           a_reg_s <= a_i;
           b_reg_s <= b_i;
@@ -129,12 +129,23 @@ begin
           adder_reg2_s <= adder_reg1_s;
           -- Store the valid bit from stage 5 in a register
           valid_reg5_s <= valid_reg4_s;
+
+        elsif (valid_i = '0') then
+          valid_reg1_s <= valid_i;
+          valid_reg2_s <= valid_reg1_s;
+          valid_reg3_s <= valid_reg2_s;
+          valid_reg4_s <= valid_reg3_s;
+          valid_reg5_s <= valid_reg4_s;
       end if; -- Reset
 
-      -- Truncate the output
-      c_o <= resize(adder_reg2_s, c_o'length);
-      -- Update valid output
-      valid_o <= valid_reg5_s;
+      if (valid_reg5_s = '1') then
+        -- Truncate the output
+        c_o <= resize(adder_reg2_s, c_o'length);
+        -- Update valid output
+        valid_o <= valid_reg5_s;
+      elsif (valid_reg5_s = '0') then
+        valid_o <= valid_reg5_s;
+      end if;
     end if; -- Clock
   end process MAC;
 end architecture behave;
