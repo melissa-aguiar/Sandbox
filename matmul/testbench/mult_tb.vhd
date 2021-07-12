@@ -31,8 +31,12 @@
 ------------------------------------------------------------------------------
 
 library ieee;
-use ieee.std_logic_1164.ALL;
+use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use ieee.math_real.all;
+
+library std;
+use std.textio.all;
 
 library work;
 use work.mult_pkg.all;
@@ -75,54 +79,31 @@ begin
     clk_s <= not clk_s;
   end process clk_process;
 
-  process
-  begin
+  input_read : process(clk_s)
+    file a_data_file            : text open read_mode is "a_k.txt";
+    file b_data_file            : text open read_mode is "b_k.txt";
+    variable a_line, b_line     : line;
+    variable a_datain, b_datain : integer;
+    begin
+      if rising_edge(clk_s) then
+        rst_s <= '1';
+        v_i_s <= '1';
 
-    rst_s <= '1';
+        if not endfile(a_data_file) then
+          readline(a_data_file, a_line);
+          read(a_line, a_datain);
 
-    v_i_s <= '1';
+          readline(b_data_file, b_line);
+          read(b_line, b_datain);
 
-    a_s.r_a <= to_signed(1, a_s.r_a'length);
-    a_s.r_k <= to_unsigned(2, a_s.r_k'length);
-    b_s <= to_signed(1, b_s'length);
+          a_s.r_a <= to_signed(a_datain, a_s.r_a'length);
+          b_s     <= to_signed(b_datain, b_s'length);
 
-    wait for clk_period;
-
-    v_i_s <= '0';
-
-    a_s.r_a <= to_signed(2, a_s.r_a'length);
-    a_s.r_k <= to_unsigned(1, a_s.r_k'length);
-
-    wait for clk_period;
-
-    a_s.r_a <= to_signed(3, a_s.r_a'length);
-    a_s.r_k <= to_unsigned(0, a_s.r_k'length);
-
-    wait for clk_period;
-
-    a_s.r_a <= to_signed(3, a_s.r_a'length);
-    a_s.r_k <= to_unsigned(2, a_s.r_k'length);
-    b_s <= to_signed(2, b_s'length);
-
-    wait for clk_period;
-
-    a_s.r_a <= to_signed(2, a_s.r_a'length);
-    a_s.r_k <= to_unsigned(1, a_s.r_k'length);
-
-    wait for clk_period;
-
-    a_s.r_a <= to_signed(1, a_s.r_a'length);
-    a_s.r_k <= to_unsigned(0, a_s.r_k'length);
-
-    wait for clk_period;
-    wait for clk_period;
-
---    if c_s = to_signed(18, c_s'length) then
---      report "SUCESS";
---    else
---        report "FAILURE";
---    end if;
-
-  end process;
+          v_i_s <= '1';
+        else
+          v_i_s <= '0';
+        end if;
+      end if;
+  end process input_read;
 
 end behave;
