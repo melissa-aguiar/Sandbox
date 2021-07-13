@@ -68,11 +68,11 @@ begin
   port map (
     clk_i       => clk_s,
     rst_n_i     => rst_s,
-    valid_i    => v_i_s,
-    a_i        => a_s,
-    b_i        => b_s,
-    c_o        => c_s,
-    valid_o    => v_o_s
+    valid_i     => v_i_s,
+    a_i         => a_s,
+    b_i         => b_s,
+    c_o         => c_s,
+    valid_o     => v_o_s
     );
 
   clk_process : process is

@@ -45,29 +45,29 @@ package mult_pkg is
   component matmul is
     generic(
       -- Width for input a[k]
-      g_a_width                 : natural := 32;
+      g_a_width                       : natural := 32;
       -- Width for input b[k]
-      g_b_width                 : natural := 32;
+      g_b_width                       : natural := 32;
       -- Width for output c
-      g_c_width                 : natural := 32
+      g_c_width                       : natural := 32
       );
     port(
       -- Core clock
-      clk_i                     : in std_logic;
+      clk_i                           : in std_logic;
       -- Reset
-      rst_n_i                   : in std_logic;
+      rst_n_i                         : in std_logic;
       -- Clear
-      clear_acc_i               : in std_logic;
+      clear_acc_i                     : in std_logic;
       -- Data valid input
-      valid_i                   : in std_logic;
+      valid_i                         : in std_logic;
       -- Input a[k]
-      a_i                       : in signed(g_a_width-1 downto 0);
+      a_i                             : in signed(g_a_width-1 downto 0);
       -- Input b[k]
-      b_i                       : in signed(g_b_width-1 downto 0);
+      b_i                             : in signed(g_b_width-1 downto 0);
       -- Result output
-      c_o                       : out signed(g_c_width-1 downto 0);
+      c_o                             : out signed(g_c_width-1 downto 0);
       -- Data valid output
-      valid_o                   : out std_logic
+      valid_o                         : out std_logic
       );
   end component;
 
@@ -75,30 +75,32 @@ package mult_pkg is
 
   generic(
     -- Width for input a[k]
-    g_a_width                   : natural := 32;
+    g_a_width                         : natural := 32;
     -- Width for input b[k]
-    g_b_width                   : natural := 32;
+    g_b_width                         : natural := 32;
     -- Width for output c
-    g_c_width                   : natural := 32;
+    g_c_width                         : natural := 32;
     -- Extra bits for accumulator
-    g_extra_width               : natural := 4
+    g_extra_width                     : natural := 4
     );
 
   port (
     -- Core clock
-    clk_i                       : in std_logic;
+    clk_i                             : in std_logic;
     -- Reset
-    rst_n_i                     : in std_logic;
+    rst_n_i                           : in std_logic;
     -- Data valid input
-    valid_i                     : in std_logic;
+    valid_i                           : in std_logic;
     -- Input a[k] and index k
-    a_i                         : in t_record;
+    a_i                               : in t_record;
     -- Input b[k]
-    b_i                         : in signed(g_b_width-1 downto 0);
+    b_i                               : in signed(g_b_width-1 downto 0);
     -- Result output
-    c_o                         : out signed(g_c_width-1 downto 0);
+    c_o                               : out signed(g_c_width-1 downto 0);
     -- Data valid output
-    valid_o                     : out std_logic
+    valid_o                           : out std_logic;
+    -- Validate the end of fofb cycle
+    valid_end_o                       : out std_logic
     );
   end component;
 

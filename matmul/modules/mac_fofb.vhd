@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-08-07  1.0      melissa.aguiar        Created
+-- 2021-13-07  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -41,32 +41,34 @@ entity mac_fofb is
 
   generic(
     -- Width for input a[k]
-    g_a_width                   : natural := 32;
+    g_a_width                           : natural := 32;
     -- Width for input b[k]
-    g_b_width                   : natural := 32;
+    g_b_width                           : natural := 32;
     -- Width for output c
-    g_c_width                   : natural := 32;
+    g_c_width                           : natural := 32;
     -- Extra bits for accumulator
-    g_extra_width               : natural := 4;
+    g_extra_width                       : natural := 4;
     -- Number of products
-    g_mac_size                  : natural := 256
+    g_mac_size                          : natural := 256
   );
 
   port (
     -- Core clock
-    clk_i                       : in std_logic;
+    clk_i                               : in std_logic;
     -- Reset
-    rst_n_i                     : in std_logic;
+    rst_n_i                             : in std_logic;
     -- Data valid input
-    valid_i                     : in std_logic;
+    valid_i                             : in std_logic;
     -- Input a[k] and index k
-    a_i                         : in t_record;
+    a_i                                 : in t_record;
     -- Input b[k]
-    b_i                         : in signed(g_b_width-1 downto 0);
+    b_i                                 : in signed(g_b_width-1 downto 0);
     -- Result output
-    c_o                         : out signed(g_c_width-1 downto 0);
+    c_o                                 : out signed(g_c_width-1 downto 0);
     -- Data valid output
-    valid_o                     : out std_logic
+    valid_o                             : out std_logic;
+    -- Validate the end of fofb cycle
+    valid_end_o                         : out std_logic
     );
 end mac_fofb;
 
@@ -96,7 +98,6 @@ architecture behave of mac_fofb is
   signal clr_s, v_i_s : std_logic := '0';
   signal a_s          : signed(g_a_width-1 downto 0) := (others => '0');
   signal b_s          : signed(g_b_width-1 downto 0) := (others => '0');
-  signal v_cnt_s      : std_logic := '0'; -- Validate the product outputs
   signal cnt          : integer := 0;
 
 begin
@@ -116,26 +117,25 @@ begin
   process(clk_i)
   begin
     if (rising_edge(clk_i)) then
-
       if rst_n_i = '0' then
         a_s         <= (others => '0');
         b_s         <= (others => '0');
         clr_s       <= '0';
         cnt         <= 0;
-        v_cnt_s     <= '0';
+        valid_end_o <= '0';
 
       else
-        a_s         <= a_i.r_a;
-        b_s         <= b_i;
-        v_i_s       <= valid_i;
+        a_s   <= a_i.r_a;
+        b_s   <= b_i;
+        v_i_s <= valid_i;
 
         if v_i_s = '1' then
           if (cnt < g_mac_size + 4) then
-            cnt     <= cnt + 1;
-            v_cnt_s <= '0';
+            valid_end_o <= '0';
+            cnt         <= cnt + 1;
           else
-            v_cnt_s <= '1';
-            cnt     <= 0;
+            valid_end_o <= '1';
+            cnt         <= 0;
           end if;
         end if;
       end if; -- Reset
