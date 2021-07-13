@@ -130,7 +130,7 @@ begin
           valid_reg5_s <= valid_reg4_s;
 
         elsif (valid_i = '0') then
-          -- Store the bit valid
+          -- Store the valid bit
           valid_reg1_s <= valid_i;
           valid_reg2_s <= valid_reg1_s;
           valid_reg3_s <= valid_reg2_s;

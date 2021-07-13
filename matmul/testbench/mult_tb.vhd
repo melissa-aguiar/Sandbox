@@ -126,11 +126,13 @@ begin
     variable c_line   : line;
     variable dataout  : integer;
     begin
-      if rising_edge(clk_s) then
-        -- Write output to a txt file
+      if v_o_s = '1' then
         dataout := to_integer(c_s);
-        write(c_line, dataout);
-        writeline(ouput_file, c_line);
+        if rising_edge(clk_s) then
+          -- Write output to a txt file
+          write(c_line, dataout);
+          writeline(ouput_file, c_line);
+        end if;
       end if;
   end process output_write;
   end architecture behave;
