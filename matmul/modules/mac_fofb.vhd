@@ -95,10 +95,10 @@ architecture behave of mac_fofb is
       );
   end component;
 
-  signal clr_s, v_i_s : std_logic := '0';
-  signal a_s          : signed(g_a_width-1 downto 0) := (others => '0');
-  signal b_s          : signed(g_b_width-1 downto 0) := (others => '0');
-  signal cnt          : integer := 0;
+  signal clr_s, v_i_s                   : std_logic := '0';
+  signal a_s                            : signed(g_a_width-1 downto 0) := (others => '0');
+  signal b_s                            : signed(g_b_width-1 downto 0) := (others => '0');
+  signal cnt                            : integer := 0;
 
 begin
 
@@ -114,14 +114,14 @@ begin
     valid_o     => valid_o
     );
 
-  process(clk_i)
+  MAC_TOP : process(clk_i)
   begin
     if (rising_edge(clk_i)) then
       if rst_n_i = '0' then
         a_s         <= (others => '0');
         b_s         <= (others => '0');
         clr_s       <= '0';
-        cnt         <= 0;
+        cnt         <=  0;
         valid_end_o <= '0';
 
       else
@@ -132,13 +132,15 @@ begin
         if v_i_s = '1' then
           if (cnt < g_mac_size + 4) then
             valid_end_o <= '0';
-            cnt         <= cnt + 1;
+            cnt <= cnt + 1;
+
           else
             valid_end_o <= '1';
-            cnt         <= 0;
+            cnt <= 0;
           end if;
         end if;
+
       end if; -- Reset
     end if; -- Clock
-  end process;
-end architecture;
+  end process MAC_TOP;
+end architecture behave;

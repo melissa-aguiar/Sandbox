@@ -38,8 +38,10 @@ package mult_pkg is
 
   type t_record is
   record
-  r_a : signed(32-1 downto 0);   -- value of input a[k]
-  r_k : unsigned(32-1 downto 0); -- value of index k
+  -- Value of input a[k]
+  r_a                                 : signed(32-1 downto 0);
+  -- Value of index k
+  r_k                                 : unsigned(32-1 downto 0);
   end record;
 
   component matmul is
@@ -69,7 +71,7 @@ package mult_pkg is
       -- Data valid output
       valid_o                         : out std_logic
       );
-  end component;
+  end component matmul;
 
   component mac_fofb is
 
@@ -102,6 +104,6 @@ package mult_pkg is
     -- Validate the end of fofb cycle
     valid_end_o                       : out std_logic
     );
-  end component;
+  end component mac_fofb;
 
 end package mult_pkg;

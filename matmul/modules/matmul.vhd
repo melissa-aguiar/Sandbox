@@ -41,38 +41,39 @@ entity matmul is
 
   generic(
     -- Width for input a[k]
-    g_a_width                     : natural := 32;
+    g_a_width                                     : natural := 32;
     -- Width for input b[k]
-    g_b_width                     : natural := 32;
+    g_b_width                                     : natural := 32;
     -- Width for output c
-    g_c_width                     : natural := 32;
+    g_c_width                                     : natural := 32;
     -- Extra bits for accumulator
-    g_extra_width                 : natural := 4
+    g_extra_width                                 : natural := 4
   );
 
   port (
     -- Core clock
-    clk_i                         : in std_logic;
+    clk_i                                         : in std_logic;
     -- Reset all pipeline stages
-    rst_n_i                       : in std_logic;
+    rst_n_i                                       : in std_logic;
     -- Clear the accumulator
-    clear_acc_i                   : in std_logic;
+    clear_acc_i                                   : in std_logic;
     -- Data valid input
-    valid_i                       : in std_logic;
+    valid_i                                       : in std_logic;
     -- Input a[k]
-    a_i                           : in signed(g_a_width-1 downto 0);
+    a_i                                           : in signed(g_a_width-1 downto 0);
     -- Input b[k]
-    b_i                           : in signed(g_b_width-1 downto 0);
+    b_i                                           : in signed(g_b_width-1 downto 0);
     -- Result output
-    c_o                           : out signed(g_c_width-1 downto 0);
+    c_o                                           : out signed(g_c_width-1 downto 0);
     -- Data valid output
-    valid_o                       : out std_logic
+    valid_o                                       : out std_logic
     );
 end matmul;
 
 architecture behave of matmul is
   -- Registers for input values
-  signal a_reg_s, b_reg_s                         : signed(g_b_width-1 downto 0)                 := (others =>'0');
+  signal a_reg_s                                  : signed(g_a_width-1 downto 0)                 := (others =>'0');
+  signal b_reg_s                                  : signed(g_b_width-1 downto 0)                 := (others =>'0');
   -- Registers for intermediate values
   signal mult_reg_s                               : signed(2*g_c_width-1 downto 0)               := (others =>'0');
   signal adder_out_s, adder_reg1_s, adder_reg2_s  : signed(2*g_c_width+g_extra_width-1 downto 0) := (others =>'0');
@@ -132,12 +133,13 @@ begin
         valid_reg5_s <= valid_reg4_s;
         -- Store the valid bit output
         valid_o <= valid_reg5_s;
-      end if; -- Reset
 
-      if (valid_reg5_s = '1') then
-        -- Truncate the output
-        c_o <= resize(adder_reg2_s, c_o'length);
-      end if;
+        if (valid_reg5_s = '1') then
+          -- Truncate the output
+          c_o <= resize(adder_reg2_s, c_o'length);
+        end if;
+
+      end if; -- Reset
     end if; -- Clock
   end process MAC;
 end architecture behave;

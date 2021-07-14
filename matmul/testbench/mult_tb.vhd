@@ -46,17 +46,18 @@ end mult_tb;
 
 architecture behave of mult_tb is
 
-  constant clk_period : time      := 10 ns;
+  constant clk_period : time                         := 10 ns;
 
-  constant g_a_width  : natural   := 32;
-  constant g_b_width  : natural   := 32;
-  constant g_c_width  : natural   := 32;
+  constant g_a_width  : natural                      := 32;
+  constant g_b_width  : natural                      := 32;
+  constant g_c_width  : natural                      := 32;
 
-  signal clk_s        : std_logic := '0';
-  signal rst_s        : std_logic := '0';
-  signal v_i_s        : std_logic := '0';
-  signal v_o_s        : std_logic := '0';
-  signal a_s          : t_record;
+  signal clk_s        : std_logic                    := '0';
+  signal rst_s        : std_logic                    := '0';
+  signal v_i_s        : std_logic                    := '0';
+  signal v_o_s        : std_logic                    := '0';
+
+  signal a_s          : t_record                     := ((others => '0'), (others => '0'));
   signal b_s          : signed(g_b_width-1 downto 0) := (others => '0');
   signal c_s          : signed(g_c_width-1 downto 0);
 
@@ -95,27 +96,40 @@ begin
   end process;
 
   input_read : process(clk_s)
-    file a_data_file            : text open read_mode is "a_k.txt";
-    file b_data_file            : text open read_mode is "b_k.txt";
-    variable a_line, b_line     : line;
-    variable a_datain, b_datain : integer;
+    file a_data_file                      : text open read_mode is "a_k.txt";
+    file b_data_file                      : text open read_mode is "b_k.txt";
+    file k_data_file                      : text open read_mode is "k.txt";
+    variable a_line, b_line, k_line       : line;
+    variable a_datain, b_datain, k_datain : integer;
+
     begin
       if rising_edge(clk_s) then
         rst_s <= '1';
+
         if not endfile(a_data_file) and valid_tr = '1' then
+
           -- Reading input a[k] from a txt file
           readline(a_data_file, a_line);
           read(a_line, a_datain);
+
+          -- Reading input k from a txt file
+          readline(k_data_file, k_line);
+          read(k_line, k_datain);
+
           -- Reading input b[k] from a txt file
           readline(b_data_file, b_line);
           read(b_line, b_datain);
+
           -- Pass the variable to a signal
           a_s.r_a <= to_signed(a_datain, a_s.r_a'length);
+          a_s.r_k <= to_unsigned(k_datain, a_s.r_k'length);
           b_s     <= to_signed(b_datain, b_s'length);
+
           -- Update valid input bit
           v_i_s <= '1';
+
         else
-        -- Update valid input bit
+          -- Update valid input bit
           v_i_s <= '0';
         end if;
       end if;
@@ -125,9 +139,11 @@ begin
     file ouput_file   : text open write_mode is "my_output.txt";
     variable c_line   : line;
     variable dataout  : integer;
+
     begin
       if v_o_s = '1' then
         dataout := to_integer(c_s);
+
         if rising_edge(clk_s) then
           -- Write output to a txt file
           write(c_line, dataout);
@@ -135,4 +151,4 @@ begin
         end if;
       end if;
   end process output_write;
-  end architecture behave;
+end architecture behave;
