@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-12-07  1.0      melissa.aguiar        Created
+-- 2021-14-07  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -98,44 +98,40 @@ begin
         valid_reg4_s <= '0';
         valid_reg5_s <= '0';
 
-        elsif (clear_acc_i = '1') then
-          -- Clear data from accumulator
-          adder_out_s <= (others => '0');
+      elsif (clear_acc_i = '1') then
+        -- Clear data from accumulator
+        adder_out_s <= (others => '0');
 
-        elsif (valid_i = '1') then
-          -- Pipeline stage 1: Store the inputs in a register
-          a_reg_s <= a_i;
-          b_reg_s <= b_i;
-          -- Store the valid bit from stage 1 in a register
-          valid_reg1_s <= valid_i;
+      else
+        -- Pipeline stage 1: Store the inputs in a register
+        a_reg_s <= a_i;
+        b_reg_s <= b_i;
+        -- Store the valid bit from stage 1 in a register
+        valid_reg1_s <= valid_i;
 
-          -- Pipeline stage 2: Store multiplication result in a register
-          mult_reg_s <= a_reg_s * b_reg_s;
-          -- Store the valid bit from stage 2 in a register
-          valid_reg2_s <= valid_reg1_s;
+        -- Pipeline stage 2: Store multiplication result in a register
+        mult_reg_s <= a_reg_s * b_reg_s;
+        -- Store the valid bit from stage 2 in a register
+        valid_reg2_s <= valid_reg1_s;
 
-          -- Pipeline stage 3: Store accumulation result in a register
+        -- Pipeline stage 3: Store accumulation result in a register
+        if (valid_reg2_s = '1') then
           adder_out_s <= adder_out_s + mult_reg_s;
-          -- Store the valid bit from stage 3 in a register
-          valid_reg3_s <= valid_reg2_s;
+        end if;
+        -- Store the valid bit from stage 3 in a register
+        valid_reg3_s <= valid_reg2_s;
 
-          -- Pipeline stage 4: Register the accumulation to fully pipeline the DSP cascade
-          adder_reg1_s <= adder_out_s;
-          -- Store the valid bit from stage 4 in a register
-          valid_reg4_s <= valid_reg3_s;
+        -- Pipeline stage 4: Register the accumulation to fully pipeline the DSP cascade
+        adder_reg1_s <= adder_out_s;
+        -- Store the valid bit from stage 4 in a register
+        valid_reg4_s <= valid_reg3_s;
 
-          -- Pipeline stage 5: Register the accumulation to fully pipeline the DSP cascade
-          adder_reg2_s <= adder_reg1_s;
-          -- Store the valid bit from stage 5 in a register
-          valid_reg5_s <= valid_reg4_s;
-
-        elsif (valid_i = '0') then
-          -- Store the valid bit
-          valid_reg1_s <= valid_i;
-          valid_reg2_s <= valid_reg1_s;
-          valid_reg3_s <= valid_reg2_s;
-          valid_reg4_s <= valid_reg3_s;
-          valid_reg5_s <= valid_reg4_s;
+        -- Pipeline stage 5: Register the accumulation to fully pipeline the DSP cascade
+        adder_reg2_s <= adder_reg1_s;
+        -- Store the valid bit from stage 5 in a register
+        valid_reg5_s <= valid_reg4_s;
+        -- Store the valid bit output
+        valid_o <= valid_reg5_s;
       end if; -- Reset
 
       if (valid_reg5_s = '1') then
