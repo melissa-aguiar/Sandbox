@@ -134,10 +134,8 @@ begin
         -- Store the valid bit output
         valid_o <= valid_reg5_s;
 
-        if (valid_reg5_s = '1') then
-          -- Truncate the output
-          c_o <= resize(adder_reg2_s, c_o'length);
-        end if;
+        -- Truncate the output
+        c_o <= resize(adder_reg2_s, c_o'length);
 
       end if; -- Reset
     end if; -- Clock

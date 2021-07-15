@@ -46,7 +46,7 @@ end mult_tb;
 
 architecture behave of mult_tb is
 
-  constant clk_period : time                         := 10 ns;
+  constant clk_period : time                         := 3.3 ns;
 
   constant g_a_width  : natural                      := 32;
   constant g_b_width  : natural                      := 32;
@@ -85,14 +85,14 @@ begin
   valid_tr_gen : process
   begin
   if rst_s = '1' then
-      valid_tr <= '0';
-      wait for clk_period;
-      valid_tr <= '1';
-      wait for clk_period;
-    else
-      valid_tr <= '0';
-      wait for clk_period;
-    end if;
+    valid_tr <= '0';
+    wait for clk_period;
+    valid_tr <= '1';
+    wait for clk_period;
+  else
+    valid_tr <= '0';
+    wait for clk_period;
+  end if;
   end process;
 
   input_read : process(clk_s)
