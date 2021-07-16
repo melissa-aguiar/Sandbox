@@ -61,6 +61,9 @@ architecture behave of mult_tb is
   signal b_s          : signed(g_b_width-1 downto 0) := (others => '0');
   signal c_s          : signed(g_c_width-1 downto 0);
 
+  signal c_acc_s      : signed(g_c_width-1 downto 0);
+  signal my_out_s     : signed(g_c_width-1 downto 0);
+
   signal valid_tr     : std_logic;
 
 begin
@@ -136,9 +139,11 @@ begin
   end process input_read;
 
   output_write : process(clk_s)
-    file ouput_file   : text open write_mode is "my_output.txt";
-    variable c_line   : line;
-    variable dataout  : integer;
+    file ouput_file             : text open write_mode is "my_output.txt";
+    file c_data_file            : text open read_mode is "c_acc.txt";
+    variable o_line, c_line     : line;
+    variable dataout, c_datain  : integer;
+    variable pass_test          : std_logic := '0';
 
     begin
       if v_o_s = '1' then
@@ -146,8 +151,24 @@ begin
 
         if rising_edge(clk_s) then
           -- Write output to a txt file
-          write(c_line, dataout);
-          writeline(ouput_file, c_line);
+          write(o_line, dataout);
+          writeline(ouput_file, o_line);
+
+          -- Reading input c_acc from a txt file
+          readline(c_data_file, c_line);
+          read(c_line, c_datain);
+
+          -- Report if it the test fail
+          if dataout /= c_datain then
+            report "FAIL";
+            pass_test := '0';
+          else
+            pass_test := '1';
+          end if;
+        end if;
+
+        if endfile(c_data_file) and pass_test = '1' then
+          report "SUCESS";
         end if;
       end if;
   end process output_write;
