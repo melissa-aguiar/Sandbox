@@ -99,8 +99,8 @@ package mult_pkg is
     b_i                               : in signed(g_b_width-1 downto 0);
     -- Result output
     c_o                               : out signed(g_c_width-1 downto 0);
-    -- Data valid output
-    valid_o                           : out std_logic;
+    -- Data valid output for debugging
+    valid_debug_o                     : out std_logic;
     -- Validate the end of fofb cycle
     valid_end_o                       : out std_logic
     );

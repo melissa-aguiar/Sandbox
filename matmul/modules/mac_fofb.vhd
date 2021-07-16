@@ -65,8 +65,8 @@ entity mac_fofb is
     b_i                                 : in signed(g_b_width-1 downto 0);
     -- Result output
     c_o                                 : out signed(g_c_width-1 downto 0);
-    -- Data valid output
-    valid_o                             : out std_logic;
+    -- Data valid output for debugging`
+    valid_debug_o                       : out std_logic;
     -- Validate the end of fofb cycle
     valid_end_o                         : out std_logic
     );
@@ -118,18 +118,18 @@ begin
   begin
     if (rising_edge(clk_i)) then
       if rst_n_i = '0' then
-        a_s         <= (others => '0');
-        b_s         <= (others => '0');
-        clr_s       <= '0';
-        cnt         <=  0;
-        valid_end_o <= '0';
-        valid_o <= '0';
+        a_s           <= (others => '0');
+        b_s           <= (others => '0');
+        clr_s         <= '0';
+        cnt           <=  0;
+        valid_end_o   <= '0';
+        valid_debug_o <= '0';
 
       else
-        a_s   <= a_i.r_a;
-        b_s   <= b_i;
-        v_i_s <= valid_i;
-        valid_o <= v_o_s;
+        a_s           <= a_i.r_a;
+        b_s           <= b_i;
+        v_i_s         <= valid_i;
+        valid_debug_o <= v_o_s;
 
         if v_o_s = '1' then
           if (cnt < g_mac_size) then
