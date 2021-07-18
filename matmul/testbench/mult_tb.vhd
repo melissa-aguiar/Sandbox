@@ -46,11 +46,12 @@ end mult_tb;
 
 architecture behave of mult_tb is
 
-  constant clk_period : time                         := 3.3 ns;
+  constant clk_period : time                         := 10 ns;
 
   constant g_a_width  : natural                      := 32;
   constant g_b_width  : natural                      := 32;
   constant g_c_width  : natural                      := 32;
+  constant g_packet_size : natural                   := 73;
 
   signal clk_s        : std_logic                    := '0';
   signal rst_s        : std_logic                    := '0';
@@ -66,6 +67,8 @@ architecture behave of mult_tb is
 
   signal valid_tr     : std_logic;
 
+  signal fod_dat_s    : std_logic_vector(g_packet_size-1 downto 0);
+
 begin
 
   mac_fofb_INST : mac_fofb
@@ -73,6 +76,7 @@ begin
     clk_i         => clk_s,
     rst_n_i       => rst_s,
     valid_i       => v_i_s,
+    fod_dat_i     => fod_dat_s,
     a_i           => a_s,
     b_i           => b_s,
     c_o           => c_s,
@@ -102,8 +106,14 @@ begin
     file a_data_file                      : text open read_mode is "a_k.txt";
     file b_data_file                      : text open read_mode is "b_k.txt";
     file k_data_file                      : text open read_mode is "k.txt";
+
+    file fod_data_file                    : text open read_mode is "fofb_fod.txt";
+
     variable a_line, b_line, k_line       : line;
     variable a_datain, b_datain, k_datain : integer;
+
+    variable fod_datain                   : bit_vector(g_packet_size-1 downto 0);
+    variable fod_line                     : line;
 
     begin
       if rising_edge(clk_s) then
@@ -123,10 +133,16 @@ begin
           readline(b_data_file, b_line);
           read(b_line, b_datain);
 
+          -- Reading input fod_dat_i from a txt file
+          readline(fod_data_file, fod_line);
+          read(fod_line, fod_datain);
+
           -- Pass the variable to a signal
           a_s.r_a <= to_signed(a_datain, a_s.r_a'length);
           a_s.r_k <= to_unsigned(k_datain, a_s.r_k'length);
           b_s     <= to_signed(b_datain, b_s'length);
+
+          fod_dat_s <= to_stdlogicvector(fod_datain);
 
           -- Update valid input bit
           v_i_s <= '1';

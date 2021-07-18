@@ -42,12 +42,16 @@ entity mac_fofb is
   generic(
     -- Width for input a[k]
     g_a_width                           : natural := 32;
+    -- Width for index k
+    g_k_width                           : natural := 9;
     -- Width for input b[k]
     g_b_width                           : natural := 32;
     -- Width for output c
     g_c_width                           : natural := 32;
     -- Extra bits for accumulator
     g_extra_width                       : natural := 4;
+    -- Size of incoming data packet
+    g_packet_size                       : natural := 73;
     -- Number of products
     g_mac_size                          : natural := 256
   );
@@ -59,6 +63,8 @@ entity mac_fofb is
     rst_n_i                             : in std_logic;
     -- Data valid input
     valid_i                             : in std_logic;
+    -- Packet input
+    fod_dat_i                           : in std_logic_vector(g_packet_size-1 downto 0);
     -- Input a[k] and index k
     a_i                                 : in t_record;
     -- Input b[k]
@@ -96,8 +102,9 @@ architecture behave of mac_fofb is
   end component;
 
   signal clr_s, v_i_s, v_o_s            : std_logic := '0';
-  signal a_s                            : signed(g_a_width-1 downto 0) := (others => '0');
-  signal b_s                            : signed(g_b_width-1 downto 0) := (others => '0');
+  signal a_s                            : signed(g_a_width-1 downto 0)   := (others => '0');
+  signal b_s                            : signed(g_b_width-1 downto 0)   := (others => '0');
+  signal k_s                            : unsigned(g_k_width-1 downto 0) := (others => '0');
   signal cnt                            : integer := 0;
 
 begin
@@ -126,8 +133,9 @@ begin
         valid_debug_o <= '0';
 
       else
-        a_s           <= a_i.r_a;
-        b_s           <= b_i;
+        a_s           <= signed(fod_dat_i(63 downto 32));
+        b_s           <= signed(fod_dat_i(31 downto 0));
+        k_s           <= unsigned(fod_dat_i(g_packet_size-1 downto 64));
         v_i_s         <= valid_i;
         valid_debug_o <= v_o_s;
 
