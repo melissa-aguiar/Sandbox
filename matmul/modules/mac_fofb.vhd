@@ -26,7 +26,7 @@
 
 -- Date        Version  Author                Description
 
--- 2021-13-07  1.0      melissa.aguiar        Created
+-- 2021-19-07  1.0      melissa.aguiar        Created
 
 ------------------------------------------------------------------------------
 
@@ -42,9 +42,9 @@ entity mac_fofb is
   generic(
     -- Width for input a[k]
     g_a_width                           : natural := 32;
-    -- Width for index k
+    -- Width for index k (coeff_x_addr)
     g_k_width                           : natural := 9;
-    -- Width for input b[k]
+    -- Width for input b[k] (coeff_x_dat)
     g_b_width                           : natural := 32;
     -- Width for output c
     g_c_width                           : natural := 32;
@@ -63,17 +63,17 @@ entity mac_fofb is
     rst_n_i                             : in std_logic;
     -- Data valid input
     valid_i                             : in std_logic;
-    -- Packet input
+    -- Packet input (id, xpos, ypos)
     fod_dat_i                           : in std_logic_vector(g_packet_size-1 downto 0);
     -- Input b[k]
-    b_i                                 : in signed(g_b_width-1 downto 0);
+    coeff_x_dat_i                       : in signed(g_b_width-1 downto 0);
     -- Result output
     c_o                                 : out signed(g_c_width-1 downto 0);
     -- Data valid output for debugging`
     valid_debug_o                       : out std_logic;
     -- Validate the end of fofb cycle
     valid_end_o                         : out std_logic
-    );
+  );
 end mac_fofb;
 
 architecture behave of mac_fofb is
@@ -101,8 +101,8 @@ architecture behave of mac_fofb is
 
   signal clr_s, v_i_s, v_o_s            : std_logic := '0';
   signal a_s                            : signed(g_a_width-1 downto 0)   := (others => '0');
-  signal b_s                            : signed(g_b_width-1 downto 0)   := (others => '0');
-  signal k_s                            : unsigned(g_k_width-1 downto 0) := (others => '0');
+  signal coeff_x_dat_s                  : signed(g_b_width-1 downto 0)   := (others => '0');
+  signal coeff_x_addr_s                 : unsigned(g_k_width-1 downto 0) := (others => '0');
   signal cnt                            : integer := 0;
 
 begin
@@ -114,7 +114,7 @@ begin
     clear_acc_i => clr_s,
     valid_i     => v_i_s,
     a_i         => a_s,
-    b_i         => b_s,
+    b_i         => coeff_x_dat_s,
     c_o         => c_o,
     valid_o     => v_o_s
     );
@@ -124,18 +124,18 @@ begin
     if (rising_edge(clk_i)) then
       if rst_n_i = '0' then
         a_s           <= (others => '0');
-        b_s           <= (others => '0');
+        coeff_x_dat_s <= (others => '0');
         clr_s         <= '0';
         cnt           <=  0;
         valid_end_o   <= '0';
         valid_debug_o <= '0';
 
       else
-        a_s           <= signed(fod_dat_i((g_a_width+g_b_width-1) downto g_b_width));
-        b_s           <= signed(fod_dat_i(g_b_width-1 downto 0));
-        k_s           <= unsigned(fod_dat_i(g_packet_size-1 downto (g_a_width+g_b_width)));
-        v_i_s         <= valid_i;
-        valid_debug_o <= v_o_s;
+        coeff_x_addr_s  <= unsigned(fod_dat_i(g_packet_size-1 downto (2*g_a_width))); -- signal to be send to coeff_x_addr_i from wrapper
+        coeff_x_dat_s   <= coeff_x_dat_i;                                             -- signal to receive coeff_x_dat_o from wrapper
+        a_s             <= signed(fod_dat_i((2*g_a_width-1) downto g_a_width));       -- a_s will be delayed to wait for coeff_x_dat_s
+        v_i_s           <= valid_i;
+        valid_debug_o   <= v_o_s;
 
         if v_o_s = '1' then
           if (cnt < g_mac_size) then

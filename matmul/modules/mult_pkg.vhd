@@ -70,7 +70,9 @@ package mult_pkg is
   generic(
     -- Width for input a[k]
     g_a_width                           : natural := 32;
-    -- Width for input b[k]
+    -- Width for index k (coeff_x_addr)
+    g_k_width                           : natural := 9;
+    -- Width for input b[k] (coeff_x_dat)
     g_b_width                           : natural := 32;
     -- Width for output c
     g_c_width                           : natural := 32;
@@ -80,26 +82,26 @@ package mult_pkg is
     g_packet_size                       : natural := 73;
     -- Number of products
     g_mac_size                          : natural := 160
-    );
+  );
 
   port (
     -- Core clock
-    clk_i                             : in std_logic;
+    clk_i                               : in std_logic;
     -- Reset
-    rst_n_i                           : in std_logic;
+    rst_n_i                             : in std_logic;
     -- Data valid input
-    valid_i                           : in std_logic;
-    -- Packet input id, xpos, ypos
-    fod_dat_i                         : in std_logic_vector(g_packet_size-1 downto 0);
+    valid_i                             : in std_logic;
+    -- Packet input
+    fod_dat_i                           : in std_logic_vector(g_packet_size-1 downto 0);
     -- Input b[k]
-    b_i                               : in signed(g_b_width-1 downto 0);
+    coeff_x_dat_i                       : in signed(g_b_width-1 downto 0);
     -- Result output
-    c_o                               : out signed(g_c_width-1 downto 0);
-    -- Data valid output for debugging
-    valid_debug_o                     : out std_logic;
+    c_o                                 : out signed(g_c_width-1 downto 0);
+    -- Data valid output for debugging`
+    valid_debug_o                       : out std_logic;
     -- Validate the end of fofb cycle
-    valid_end_o                       : out std_logic
-    );
+    valid_end_o                         : out std_logic
+  );
   end component mac_fofb;
 
 end package mult_pkg;
