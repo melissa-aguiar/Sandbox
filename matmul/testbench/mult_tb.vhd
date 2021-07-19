@@ -46,7 +46,7 @@ end mult_tb;
 
 architecture behave of mult_tb is
 
-  constant clk_period : time                         := 10 ns;
+  constant clk_period : time                         := 6 ns;
 
   constant g_a_width  : natural                      := 32;
   constant g_b_width  : natural                      := 32;
@@ -58,7 +58,6 @@ architecture behave of mult_tb is
   signal v_i_s        : std_logic                    := '0';
   signal v_o_s        : std_logic                    := '0';
 
-  signal a_s          : t_record                     := ((others => '0'), (others => '0'));
   signal b_s          : signed(g_b_width-1 downto 0) := (others => '0');
   signal c_s          : signed(g_c_width-1 downto 0);
 
@@ -77,7 +76,6 @@ begin
     rst_n_i       => rst_s,
     valid_i       => v_i_s,
     fod_dat_i     => fod_dat_s,
-    a_i           => a_s,
     b_i           => b_s,
     c_o           => c_s,
     valid_debug_o => v_o_s
@@ -103,14 +101,8 @@ begin
   end process;
 
   input_read : process(clk_s)
-    file a_data_file                      : text open read_mode is "a_k.txt";
-    file b_data_file                      : text open read_mode is "b_k.txt";
-    file k_data_file                      : text open read_mode is "k.txt";
 
     file fod_data_file                    : text open read_mode is "fofb_fod.txt";
-
-    variable a_line, b_line, k_line       : line;
-    variable a_datain, b_datain, k_datain : integer;
 
     variable fod_datain                   : bit_vector(g_packet_size-1 downto 0);
     variable fod_line                     : line;
@@ -119,29 +111,13 @@ begin
       if rising_edge(clk_s) then
         rst_s <= '1';
 
-        if not endfile(a_data_file) and valid_tr = '1' then
-
-          -- Reading input a[k] from a txt file
-          readline(a_data_file, a_line);
-          read(a_line, a_datain);
-
-          -- Reading input k from a txt file
-          readline(k_data_file, k_line);
-          read(k_line, k_datain);
-
-          -- Reading input b[k] from a txt file
-          readline(b_data_file, b_line);
-          read(b_line, b_datain);
+        if not endfile(fod_data_file) and valid_tr = '1' then
 
           -- Reading input fod_dat_i from a txt file
           readline(fod_data_file, fod_line);
           read(fod_line, fod_datain);
 
           -- Pass the variable to a signal
-          a_s.r_a <= to_signed(a_datain, a_s.r_a'length);
-          a_s.r_k <= to_unsigned(k_datain, a_s.r_k'length);
-          b_s     <= to_signed(b_datain, b_s'length);
-
           fod_dat_s <= to_stdlogicvector(fod_datain);
 
           -- Update valid input bit

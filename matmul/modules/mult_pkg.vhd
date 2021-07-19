@@ -36,14 +36,6 @@ use ieee.numeric_std.all;
 
 package mult_pkg is
 
-  type t_record is
-  record
-  -- Value of input a[k]
-  r_a                                 : signed(32-1 downto 0);
-  -- Value of index k
-  r_k                                 : unsigned(32-1 downto 0);
-  end record;
-
   component matmul is
     generic(
       -- Width for input a[k]
@@ -87,7 +79,7 @@ package mult_pkg is
     -- Size of incoming data packet
     g_packet_size                       : natural := 73;
     -- Number of products
-    g_mac_size                          : natural := 256
+    g_mac_size                          : natural := 160
     );
 
   port (
@@ -97,10 +89,8 @@ package mult_pkg is
     rst_n_i                           : in std_logic;
     -- Data valid input
     valid_i                           : in std_logic;
-    -- Packet input
+    -- Packet input id, xpos, ypos
     fod_dat_i                         : in std_logic_vector(g_packet_size-1 downto 0);
-    -- Input a[k] and index k
-    a_i                               : in t_record;
     -- Input b[k]
     b_i                               : in signed(g_b_width-1 downto 0);
     -- Result output

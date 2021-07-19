@@ -53,7 +53,7 @@ entity mac_fofb is
     -- Size of incoming data packet
     g_packet_size                       : natural := 73;
     -- Number of products
-    g_mac_size                          : natural := 256
+    g_mac_size                          : natural := 160
   );
 
   port (
@@ -65,8 +65,6 @@ entity mac_fofb is
     valid_i                             : in std_logic;
     -- Packet input
     fod_dat_i                           : in std_logic_vector(g_packet_size-1 downto 0);
-    -- Input a[k] and index k
-    a_i                                 : in t_record;
     -- Input b[k]
     b_i                                 : in signed(g_b_width-1 downto 0);
     -- Result output
