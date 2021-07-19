@@ -131,8 +131,8 @@ begin
         valid_debug_o <= '0';
 
       else
-        a_s           <= signed(fod_dat_i(63 downto 32));
-        b_s           <= signed(fod_dat_i(31 downto 0));
+        a_s           <= signed(fod_dat_i((g_a_width+g_b_width-1) downto g_b_width));
+        b_s           <= signed(fod_dat_i(g_b_width-1 downto 0));
         k_s           <= unsigned(fod_dat_i(g_packet_size-1 downto 64));
         v_i_s         <= valid_i;
         valid_debug_o <= v_o_s;
