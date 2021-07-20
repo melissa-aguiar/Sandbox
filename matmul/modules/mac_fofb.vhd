@@ -67,6 +67,8 @@ entity mac_fofb is
     fod_dat_i                           : in std_logic_vector(g_packet_size-1 downto 0);
     -- Input b[k]
     coeff_x_dat_i                       : in signed(g_b_width-1 downto 0);
+    -- Output k
+    coeff_x_addr_o                      : out unsigned(9-1 downto 0);
     -- Result output
     c_o                                 : out signed(g_c_width-1 downto 0);
     -- Data valid output for debugging`
@@ -103,6 +105,8 @@ architecture behave of mac_fofb is
   signal a_s                            : signed(g_a_width-1 downto 0)   := (others => '0');
   signal coeff_x_dat_s                  : signed(g_b_width-1 downto 0)   := (others => '0');
   signal coeff_x_addr_s                 : unsigned(g_k_width-1 downto 0) := (others => '0');
+  signal coeff_y_dat_s                  : signed(g_b_width-1 downto 0)   := (others => '0');
+  signal coeff_y_addr_s                 : unsigned(g_k_width-1 downto 0) := (others => '0');
   signal cnt                            : integer := 0;
 
 begin
@@ -136,6 +140,7 @@ begin
         a_s             <= signed(fod_dat_i((2*g_a_width-1) downto g_a_width));       -- a_s will be delayed to wait for coeff_x_dat_s
         v_i_s           <= valid_i;
         valid_debug_o   <= v_o_s;
+        coeff_x_addr_o  <= coeff_x_addr_s;
 
         if v_o_s = '1' then
           if (cnt < g_mac_size) then

@@ -59,6 +59,7 @@ architecture behave of mult_tb is
   signal v_o_s        : std_logic   := '0';
   signal valid_tr     : std_logic   := '0';
 
+  signal k_s          : unsigned(9-1 downto 0)                     := (others => '0');
   signal b_s          : signed(g_b_width-1 downto 0)               := (others => '0');
   signal c_s          : signed(g_c_width-1 downto 0)               := (others => '0');
 
@@ -76,6 +77,7 @@ begin
     valid_i       => v_i_s,
     fod_dat_i     => fod_dat_s,
     coeff_x_dat_i => b_s,
+    coeff_x_addr_o=> k_s,
     c_o           => c_s,
     valid_debug_o => v_o_s
     );
@@ -105,9 +107,9 @@ begin
     variable fod_datain    : bit_vector(g_packet_size-1 downto 0);
     variable fod_line      : line;
 
-    file b_data_file     : text open read_mode is "b_k.txt";
-    variable b_datain    : integer;
-    variable b_line      : line;
+    file b_data_file       : text open read_mode is "b_k.txt";
+    variable b_datain      : integer;
+    variable b_line        : line;
 
     begin
       if rising_edge(clk_s) then

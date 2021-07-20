@@ -95,6 +95,8 @@ package mult_pkg is
     fod_dat_i                           : in std_logic_vector(g_packet_size-1 downto 0);
     -- Input b[k]
     coeff_x_dat_i                       : in signed(g_b_width-1 downto 0);
+    -- Output k
+    coeff_x_addr_o                      : out unsigned(9-1 downto 0);
     -- Result output
     c_o                                 : out signed(g_c_width-1 downto 0);
     -- Data valid output for debugging`
