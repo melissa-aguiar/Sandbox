@@ -85,8 +85,8 @@ architecture behave of mac_fofb is
       );
   end component;
 
-  signal clr_s, v_i_s, v_o_s            : std_logic := '0';
-  signal a_s                            : signed(g_a_width-1 downto 0)   := (others => '0');
+  signal clr_s, v_i_s, v_reg_s, v_o_s   : std_logic := '0';
+  signal a_s, a_reg_s                   : signed(g_a_width-1 downto 0)   := (others => '0');
   signal coeff_b_dat_s                  : signed(g_b_width-1 downto 0)   := (others => '0');
   signal coeff_k_addr_s                 : std_logic_vector(g_k_width-1 downto 0) := (others => '0');
   signal coeff_y_dat_s                  : signed(g_b_width-1 downto 0)   := (others => '0');
@@ -112,6 +112,7 @@ begin
     if (rising_edge(clk_i)) then
       if rst_n_i = '0' then
         a_s           <= (others => '0');
+        a_reg_s       <= (others => '0');
         coeff_b_dat_s <= (others => '0');
         clr_s         <= '0';
         cnt           <=  0;
@@ -119,10 +120,12 @@ begin
         valid_debug_o <= '0';
 
       else
-        coeff_k_addr_s  <= coeff_k_addr_i; -- signal to be send to coeff_x_addr_i from wrapper
-        coeff_b_dat_s   <= coeff_b_dat_i;  -- signal to receive coeff_x_dat_o from wrapper
-        a_s             <= coeff_a_dat_i;  -- a_s and valid bit will be delayed to wait for coeff_x_dat_s
-        v_i_s           <= valid_i;
+        coeff_k_addr_s  <= coeff_k_addr_i;
+        coeff_b_dat_s   <= coeff_b_dat_i;
+        a_reg_s         <= coeff_a_dat_i;   -- Delay coeff_a to wait for coeff_b
+        a_s             <= a_reg_s;
+        v_reg_s         <= valid_i;         -- Delay valid bit to wait for coeff_b
+        v_i_s           <= v_reg_s;
         valid_debug_o   <= v_o_s;
         coeff_k_addr_o  <= coeff_k_addr_s;
 
