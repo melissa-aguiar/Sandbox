@@ -1,34 +1,19 @@
-------------------------------------------------------------------------------
-
+-------------------------------------------------------------------------------
 -- Title      :  Matrix multiplication core
-
-------------------------------------------------------------------------------
-
+-------------------------------------------------------------------------------
 -- Author     :  Melissa Aguiar
-
 -- Company    : CNPEM LNLS-DIG
-
 -- Platform   : FPGA-generic
-
 -------------------------------------------------------------------------------
-
 -- Description:  Matrix multiplication core top level for the Fast Orbit Feedback
-
 -------------------------------------------------------------------------------
-
 -- Copyright (c) 2020 CNPEM
-
 -- Licensed under GNU Lesser General Public License (LGPL) v3.0
-
 -------------------------------------------------------------------------------
-
 -- Revisions  :
-
 -- Date        Version  Author                Description
-
--- 2021-19-07  1.0      melissa.aguiar        Created
-
-------------------------------------------------------------------------------
+-- 2021-20-07  1.0      melissa.aguiar        Created
+-------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.ALL;
@@ -38,7 +23,6 @@ library work;
 use work.mult_pkg.all;
 
 entity mac_fofb is
-
   generic(
     -- Width for input a[k]
     g_a_width                           : natural := 32;
@@ -50,8 +34,6 @@ entity mac_fofb is
     g_c_width                           : natural := 32;
     -- Extra bits for accumulator
     g_extra_width                       : natural := 4;
-    -- Size of incoming data packet
-    g_packet_size                       : natural := 73;
     -- Number of products
     g_mac_size                          : natural := 160
   );
@@ -63,15 +45,17 @@ entity mac_fofb is
     rst_n_i                             : in std_logic;
     -- Data valid input
     valid_i                             : in std_logic;
-    -- Packet input (id, xpos, ypos)
-    fod_dat_i                           : in std_logic_vector(g_packet_size-1 downto 0);
+    -- Input a[k]
+    coeff_a_dat_i                       : in signed(g_a_width-1 downto 0);
     -- Input b[k]
-    coeff_x_dat_i                       : in signed(g_b_width-1 downto 0);
+    coeff_b_dat_i                       : in signed(g_b_width-1 downto 0);
+    -- Input k
+    coeff_k_addr_i                      : in std_logic_vector(g_k_width-1 downto 0);
     -- Output k
-    coeff_x_addr_o                      : out unsigned(9-1 downto 0);
+    coeff_k_addr_o                      : out std_logic_vector(g_k_width-1 downto 0);
     -- Result output
     c_o                                 : out signed(g_c_width-1 downto 0);
-    -- Data valid output for debugging`
+    -- Data valid output for debugging
     valid_debug_o                       : out std_logic;
     -- Validate the end of fofb cycle
     valid_end_o                         : out std_logic
@@ -103,10 +87,10 @@ architecture behave of mac_fofb is
 
   signal clr_s, v_i_s, v_o_s            : std_logic := '0';
   signal a_s                            : signed(g_a_width-1 downto 0)   := (others => '0');
-  signal coeff_x_dat_s                  : signed(g_b_width-1 downto 0)   := (others => '0');
-  signal coeff_x_addr_s                 : unsigned(g_k_width-1 downto 0) := (others => '0');
+  signal coeff_b_dat_s                  : signed(g_b_width-1 downto 0)   := (others => '0');
+  signal coeff_k_addr_s                 : std_logic_vector(g_k_width-1 downto 0) := (others => '0');
   signal coeff_y_dat_s                  : signed(g_b_width-1 downto 0)   := (others => '0');
-  signal coeff_y_addr_s                 : unsigned(g_k_width-1 downto 0) := (others => '0');
+  signal coeff_y_addr_s                 : std_logic_vector(g_k_width-1 downto 0) := (others => '0');
   signal cnt                            : integer := 0;
 
 begin
@@ -118,7 +102,7 @@ begin
     clear_acc_i => clr_s,
     valid_i     => v_i_s,
     a_i         => a_s,
-    b_i         => coeff_x_dat_s,
+    b_i         => coeff_b_dat_s,
     c_o         => c_o,
     valid_o     => v_o_s
     );
@@ -128,19 +112,19 @@ begin
     if (rising_edge(clk_i)) then
       if rst_n_i = '0' then
         a_s           <= (others => '0');
-        coeff_x_dat_s <= (others => '0');
+        coeff_b_dat_s <= (others => '0');
         clr_s         <= '0';
         cnt           <=  0;
         valid_end_o   <= '0';
         valid_debug_o <= '0';
 
       else
-        coeff_x_addr_s  <= unsigned(fod_dat_i(g_packet_size-1 downto (2*g_a_width))); -- signal to be send to coeff_x_addr_i from wrapper
-        coeff_x_dat_s   <= coeff_x_dat_i;                                             -- signal to receive coeff_x_dat_o from wrapper
-        a_s             <= signed(fod_dat_i((2*g_a_width-1) downto g_a_width));       -- a_s will be delayed to wait for coeff_x_dat_s
+        coeff_k_addr_s  <= coeff_k_addr_i; -- signal to be send to coeff_x_addr_i from wrapper
+        coeff_b_dat_s   <= coeff_b_dat_i;  -- signal to receive coeff_x_dat_o from wrapper
+        a_s             <= coeff_a_dat_i;  -- a_s and valid bit will be delayed to wait for coeff_x_dat_s
         v_i_s           <= valid_i;
         valid_debug_o   <= v_o_s;
-        coeff_x_addr_o  <= coeff_x_addr_s;
+        coeff_k_addr_o  <= coeff_k_addr_s;
 
         if v_o_s = '1' then
           if (cnt < g_mac_size) then
